@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Daily Quest">
+  <defs>
+    <linearGradient id="or" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffbe44"/>
+      <stop offset="1" stop-color="#f68a0c"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="118" fill="url(#or)"/>
+  <path d="M138 271 L220 353 L384 164" fill="none" stroke="#140f04"
+        stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

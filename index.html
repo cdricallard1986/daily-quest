@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Daily Quest</title>
+<meta name="description" content="Suivi quotidien d'habitudes — coches, quantités et historique semaine / mois / année.">
+<meta name="theme-color" content="#0b0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Daily Quest">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="entete">
+  <div class="entete-titre">
+    <span class="logo" aria-hidden="true">◆</span>
+    <h1>Daily Quest</h1>
+  </div>
+  <button class="btn-icone" id="btn-reglages" type="button" aria-label="Réglages">⚙</button>
+</header>
+
+<main>
+  <!-- ══════════ ONGLET AUJOURD'HUI ══════════ -->
+  <section class="vue" id="vue-jour" aria-label="Journée">
+
+    <div class="nav-periode">
+      <button class="btn-nav" id="jour-prec" type="button" aria-label="Jour précédent">‹</button>
+      <div class="nav-label">
+        <span id="jour-titre">—</span>
+        <small id="jour-sous-titre"></small>
+      </div>
+      <button class="btn-nav" id="jour-suiv" type="button" aria-label="Jour suivant">›</button>
+    </div>
+
+    <div class="carte carte-score">
+      <div class="anneau">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="anneau-fond" cx="60" cy="60" r="52"></circle>
+          <circle class="anneau-jauge" id="anneau-jauge" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="anneau-texte">
+          <strong id="score-pct">0%</strong>
+          <span id="score-frac">0 / 0</span>
+        </div>
+      </div>
+      <div class="stats-jour">
+        <div class="stat">
+          <span class="stat-val" id="stat-serie">0</span>
+          <span class="stat-lib">🔥 Série</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="stat-record">0</span>
+          <span class="stat-lib">🏆 Record</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="stat-niveau">1</span>
+          <span class="stat-lib">⭐ Niveau</span>
+        </div>
+        <div class="barre-xp" title="Progression vers le niveau suivant">
+          <div class="barre-xp-jauge" id="barre-xp"></div>
+          <span id="xp-texte">0 XP</span>
+        </div>
+      </div>
+    </div>
+
+    <ul class="liste-habitudes" id="liste-habitudes"></ul>
+
+    <button class="btn-secondaire pleine-largeur" id="btn-gerer" type="button">
+      Gérer mes habitudes
+    </button>
+  </section>
+
+  <!-- ══════════ ONGLET HISTORIQUE ══════════ -->
+  <section class="vue cachee" id="vue-historique" aria-label="Historique">
+
+    <div class="segments" role="tablist">
+      <button class="segment actif" data-mode="semaine" role="tab" type="button">Semaine</button>
+      <button class="segment" data-mode="mois" role="tab" type="button">Mois</button>
+      <button class="segment" data-mode="annee" role="tab" type="button">Année</button>
+    </div>
+
+    <div class="nav-periode">
+      <button class="btn-nav" id="periode-prec" type="button" aria-label="Période précédente">‹</button>
+      <div class="nav-label">
+        <span id="periode-titre">—</span>
+        <small id="periode-sous-titre"></small>
+      </div>
+      <button class="btn-nav" id="periode-suiv" type="button" aria-label="Période suivante">›</button>
+    </div>
+
+    <div class="carte resume">
+      <div class="resume-item">
+        <span class="resume-val" id="res-moyenne">0%</span>
+        <span class="resume-lib">Moyenne</span>
+      </div>
+      <div class="resume-item">
+        <span class="resume-val" id="res-parfaits">0</span>
+        <span class="resume-lib">Jours 100 %</span>
+      </div>
+      <div class="resume-item">
+        <span class="resume-val" id="res-actifs">0</span>
+        <span class="resume-lib">Jours suivis</span>
+      </div>
+      <div class="resume-item">
+        <span class="resume-val" id="res-total">0</span>
+        <span class="resume-lib">Points validés</span>
+      </div>
+    </div>
+
+    <div id="hist-contenu"></div>
+
+    <h2 class="titre-section">Détail par habitude</h2>
+    <div id="hist-detail"></div>
+  </section>
+</main>
+
+<!-- ══════════ BARRE D'ONGLETS ══════════ -->
+<nav class="onglets" aria-label="Navigation principale">
+  <button class="onglet actif" data-vue="jour" type="button">
+    <span class="onglet-icone">✓</span><span>Aujourd'hui</span>
+  </button>
+  <button class="onglet" data-vue="historique" type="button">
+    <span class="onglet-icone">▦</span><span>Historique</span>
+  </button>
+</nav>
+
+<!-- ══════════ MODALES ══════════ -->
+<div class="voile cachee" id="voile"></div>
+
+<!-- Gestion des habitudes -->
+<div class="modale cachee" id="modale-gestion" role="dialog" aria-modal="true" aria-labelledby="titre-gestion">
+  <div class="modale-entete">
+    <h2 id="titre-gestion">Mes habitudes</h2>
+    <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
+  </div>
+  <div class="modale-corps">
+    <ul class="liste-gestion" id="liste-gestion"></ul>
+    <button class="btn-primaire pleine-largeur" id="btn-ajouter" type="button">+ Ajouter une habitude</button>
+    <p class="aide">Archiver garde l'historique ; supprimer efface aussi les données passées.</p>
+  </div>
+</div>
+
+<!-- Édition d'une habitude -->
+<div class="modale cachee" id="modale-habitude" role="dialog" aria-modal="true" aria-labelledby="titre-habitude">
+  <div class="modale-entete">
+    <h2 id="titre-habitude">Habitude</h2>
+    <span class="pill" id="pill-statut">✓ À jour</span>
+    <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
+  </div>
+  <div class="modale-corps">
+    <label class="champ">
+      <span>Nom</span>
+      <input type="text" id="ch-nom" maxlength="60" placeholder="Ex. Bois 3 litres d'eau" autocomplete="off">
+    </label>
+
+    <label class="champ">
+      <span>Icône</span>
+      <input type="text" id="ch-emoji" maxlength="4" placeholder="💧" autocomplete="off">
+    </label>
+
+    <div class="champ">
+      <span>Type de suivi</span>
+      <div class="choix" id="ch-type">
+        <button class="choix-btn" data-type="bool" type="button">À cocher</button>
+        <button class="choix-btn" data-type="quant" type="button">Quantité</button>
+      </div>
+    </div>
+
+    <div id="bloc-quant">
+      <div class="ligne-champs">
+        <label class="champ">
+          <span>Objectif</span>
+          <input type="number" id="ch-cible" min="0" step="any" inputmode="decimal">
+        </label>
+        <label class="champ">
+          <span>Unité</span>
+          <input type="text" id="ch-unite" maxlength="10" placeholder="min" autocomplete="off">
+        </label>
+        <label class="champ">
+          <span>Pas</span>
+          <input type="number" id="ch-pas" min="0" step="any" inputmode="decimal">
+        </label>
+      </div>
+    </div>
+
+    <div class="actions-modale">
+      <button class="btn-primaire pleine-largeur cachee" id="btn-creer" type="button">Créer l'habitude</button>
+      <button class="btn-danger pleine-largeur cachee" id="btn-supprimer" type="button">Supprimer / archiver</button>
+    </div>
+  </div>
+</div>
+
+<!-- Réglages -->
+<div class="modale cachee" id="modale-reglages" role="dialog" aria-modal="true" aria-labelledby="titre-reglages">
+  <div class="modale-entete">
+    <h2 id="titre-reglages">Réglages</h2>
+    <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
+  </div>
+  <div class="modale-corps">
+    <label class="champ">
+      <span>Objectif pour valider une journée (série 🔥)</span>
+      <div class="ligne-slider">
+        <input type="range" id="ch-objectif" min="50" max="100" step="5">
+        <output id="out-objectif">80 %</output>
+      </div>
+    </label>
+
+    <h3 class="titre-section">Données</h3>
+    <p class="aide">Tout est stocké sur cet appareil. Exporte régulièrement pour ne rien perdre.</p>
+    <button class="btn-secondaire pleine-largeur" id="btn-export" type="button">Exporter une sauvegarde (.json)</button>
+    <button class="btn-secondaire pleine-largeur" id="btn-import" type="button">Importer une sauvegarde</button>
+    <input type="file" id="fichier-import" accept="application/json,.json" hidden>
+    <button class="btn-danger pleine-largeur" id="btn-reinit" type="button">Tout réinitialiser</button>
+    <p class="aide" id="info-stockage"></p>
+  </div>
+</div>
+
+<!-- Confirmation -->
+<div class="modale modale-petite cachee" id="modale-confirm" role="dialog" aria-modal="true" aria-labelledby="confirm-titre">
+  <div class="modale-entete">
+    <h2 id="confirm-titre">Confirmer</h2>
+  </div>
+  <div class="modale-corps">
+    <p id="confirm-message"></p>
+    <div class="actions-modale" id="confirm-actions"></div>
+  </div>
+</div>
+
+<!-- Saisie d'une quantité -->
+<div class="modale modale-petite cachee" id="modale-quantite" role="dialog" aria-modal="true" aria-labelledby="quantite-titre">
+  <div class="modale-entete">
+    <h2 id="quantite-titre">Quantité</h2>
+    <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
+  </div>
+  <div class="modale-corps">
+    <label class="champ">
+      <span id="quantite-lib">Valeur</span>
+      <input type="number" id="ch-quantite" step="any" min="0" inputmode="decimal">
+    </label>
+    <button class="btn-primaire pleine-largeur" id="btn-valider-quantite" type="button">Valider</button>
+  </div>
+</div>
+
+<div class="toast cachee" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

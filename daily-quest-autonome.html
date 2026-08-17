@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Daily Quest</title>
+<meta name="description" content="Suivi quotidien d'habitudes — coches, quantités et historique semaine / mois / année.">
+<meta name="theme-color" content="#0b0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Daily Quest">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkRhaWx5IFF1ZXN0Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ib3IiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZiZTQ0Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Y2OGEwYyIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTgiIGZpbGw9InVybCgjb3IpIi8+CiAgPHBhdGggZD0iTTEzOCAyNzEgTDIyMCAzNTMgTDM4NCAxNjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE0MGYwNCIKICAgICAgICBzdHJva2Utd2lkdGg9IjU0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkRhaWx5IFF1ZXN0Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ib3IiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZiZTQ0Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Y2OGEwYyIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTgiIGZpbGw9InVybCgjb3IpIi8+CiAgPHBhdGggZD0iTTEzOCAyNzEgTDIyMCAzNTMgTDM4NCAxNjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE0MGYwNCIKICAgICAgICBzdHJva2Utd2lkdGg9IjU0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==" type="image/svg+xml">
+<style>
+/* ══════════════════════════════════════════════
+   Daily Quest — feuille de styles
+   Mobile-first, thème sombre.
+   ══════════════════════════════════════════════ */
+
+:root {
+  --fond: #0b0e14;
+  --fond-2: #10141d;
+  --surface: #161b26;
+  --surface-2: #1e2533;
+  --bordure: #262e3d;
+  --texte: #e8ebf2;
+  --texte-doux: #98a2b6;
+  --texte-faible: #64708a;
+  --or: #ffb020;
+  --or-doux: rgba(255, 176, 32, 0.14);
+  --vert: #34d399;
+  --vert-doux: rgba(52, 211, 153, 0.14);
+  --rouge: #f87171;
+  --rouge-doux: rgba(248, 113, 113, 0.12);
+  --bleu: #60a5fa;
+  --rayon: 16px;
+  --rayon-s: 10px;
+  --ombre: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --haut: env(safe-area-inset-top, 0px);
+  --bas: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+body {
+  padding-bottom: calc(72px + var(--bas));
+  min-height: 100vh;
+}
+
+h1, h2, h3 { margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input[type="text"], input[type="number"] {
+  font: inherit;
+  color: var(--texte);
+  background: var(--fond-2);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-s);
+  padding: 11px 12px;
+  width: 100%;
+  outline: none;
+}
+input:focus { border-color: var(--or); }
+input.erreur { border-color: var(--rouge); }
+
+/* ─────────── En-tête ─────────── */
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(12px + var(--haut)) 16px 12px;
+  background: rgba(11, 14, 20, 0.86);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bordure);
+}
+.entete-titre { display: flex; align-items: center; gap: 9px; }
+.entete h1 { font-size: 18px; }
+.logo { color: var(--or); font-size: 15px; }
+
+.btn-icone {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  color: var(--texte-doux);
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+}
+.btn-icone:active { background: var(--surface-2); }
+
+main { padding: 16px; max-width: 720px; margin: 0 auto; }
+.vue.cachee, .cachee { display: none !important; }
+
+/* ─────────── Navigation de période ─────────── */
+.nav-periode {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.btn-nav {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  font-size: 20px;
+  line-height: 1;
+  color: var(--texte-doux);
+}
+.btn-nav:disabled { opacity: 0.3; }
+.btn-nav:active:not(:disabled) { background: var(--surface-2); }
+.nav-label {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.nav-label span {
+  font-weight: 650;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-label small { color: var(--texte-faible); font-size: 12px; }
+
+/* ─────────── Cartes ─────────── */
+.carte {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.carte-score { display: flex; align-items: center; gap: 18px; }
+
+.anneau { position: relative; width: 108px; height: 108px; flex: none; }
+.anneau svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.anneau circle { fill: none; stroke-width: 9; stroke-linecap: round; }
+.anneau-fond { stroke: var(--surface-2); }
+.anneau-jauge {
+  stroke: var(--or);
+  stroke-dasharray: 326.7;
+  stroke-dashoffset: 326.7;
+  transition: stroke-dashoffset 0.45s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s;
+}
+.anneau-jauge.complet { stroke: var(--vert); }
+.anneau-texte {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.anneau-texte strong { font-size: 26px; letter-spacing: -0.03em; }
+.anneau-texte span { font-size: 12px; color: var(--texte-faible); }
+
+.stats-jour {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 4px;
+  min-width: 0;
+}
+.stat { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.stat-val { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.stat-lib { font-size: 10.5px; color: var(--texte-faible); white-space: nowrap; }
+
+.barre-xp {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.barre-xp-jauge {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: linear-gradient(90deg, var(--or), #ffd166);
+  transition: width 0.45s ease;
+}
+.barre-xp span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texte);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ─────────── Liste des habitudes ─────────── */
+.liste-habitudes { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
+
+.habitude {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  padding: 12px 14px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.habitude.faite { border-color: rgba(52, 211, 153, 0.45); background: linear-gradient(90deg, var(--vert-doux), var(--surface) 60%); }
+
+.hab-emoji {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.habitude.faite .hab-emoji { background: var(--vert-doux); }
+
+.hab-infos { flex: 1; min-width: 0; }
+.hab-nom { font-size: 15px; font-weight: 600; line-height: 1.25; }
+.habitude.faite .hab-nom { color: var(--vert); }
+.hab-detail { font-size: 12px; color: var(--texte-faible); margin-top: 2px; }
+
+.hab-jauge {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-2);
+  margin-top: 6px;
+  overflow: hidden;
+}
+.hab-jauge i { display: block; height: 100%; background: var(--or); border-radius: 2px; transition: width 0.3s; }
+.habitude.faite .hab-jauge i { background: var(--vert); }
+
+.hab-coche {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--bordure);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  color: transparent;
+  transition: all 0.18s;
+}
+.habitude.faite .hab-coche { background: var(--vert); border-color: var(--vert); color: #04240f; }
+
+.hab-quant { display: flex; align-items: center; gap: 6px; flex: none; }
+.btn-pas {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--bordure);
+  font-size: 17px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  color: var(--texte-doux);
+}
+.btn-pas:active { background: var(--bordure); }
+.hab-valeur {
+  min-width: 46px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  font-size: 14px;
+  padding: 4px 2px;
+  border-radius: 8px;
+}
+.habitude.faite .hab-valeur { color: var(--vert); }
+
+/* ─────────── Boutons ─────────── */
+.btn-primaire, .btn-secondaire, .btn-danger {
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
+}
+.btn-primaire { background: var(--or); color: #221600; }
+.btn-primaire:active { filter: brightness(0.92); }
+.btn-secondaire { background: var(--surface); border: 1px solid var(--bordure); color: var(--texte-doux); }
+.btn-secondaire:active { background: var(--surface-2); }
+.btn-danger { background: var(--rouge-doux); border: 1px solid rgba(248, 113, 113, 0.35); color: var(--rouge); }
+.pleine-largeur { display: block; width: 100%; margin-bottom: 10px; }
+
+/* ─────────── Onglets du bas ─────────── */
+.onglets {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 8px 12px calc(8px + var(--bas));
+  background: rgba(11, 14, 20, 0.92);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--bordure);
+}
+.onglet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--texte-faible);
+}
+.onglet-icone { font-size: 18px; line-height: 1.1; }
+.onglet.actif { color: var(--or); background: var(--or-doux); }
+
+/* ─────────── Segments (semaine/mois/année) ─────────── */
+.segments {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+.segment {
+  padding: 9px 4px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texte-faible);
+  text-align: center;
+}
+.segment.actif { background: var(--or); color: #221600; }
+
+/* ─────────── Résumé ─────────── */
+.resume { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 14px 10px; }
+.resume-item { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+.resume-val { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+.resume-lib { font-size: 10.5px; color: var(--texte-faible); line-height: 1.2; }
+
+.titre-section {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--texte-faible);
+  margin: 22px 0 10px;
+}
+
+/* ─────────── Grille semaine ─────────── */
+.grille-semaine { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tab-semaine { width: 100%; border-collapse: separate; border-spacing: 0; }
+.tab-semaine th, .tab-semaine td { padding: 0; }
+.tab-semaine thead th {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texte-faible);
+  padding-bottom: 8px;
+  text-align: center;
+  width: 34px;
+}
+.tab-semaine thead th.aujourdhui { color: var(--or); }
+.tab-semaine thead th small { display: block; font-size: 10px; font-weight: 500; opacity: 0.75; }
+.col-hab { text-align: left !important; width: auto !important; min-width: 96px; }
+.cel-hab {
+  font-size: 12.5px;
+  color: var(--texte-doux);
+  padding: 4px 8px 4px 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+.cel-hab .e { margin-right: 5px; }
+.pastille {
+  width: 26px;
+  height: 26px;
+  margin: 3px auto;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--vert);
+}
+.pastille.ok { background: var(--vert); border-color: var(--vert); color: #04240f; }
+.pastille.partiel { background: var(--or-doux); border-color: rgba(255, 176, 32, 0.5); color: var(--or); font-size: 9px; font-weight: 700; }
+.ligne-total td { padding-top: 8px !important; }
+.total-jour {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texte-doux);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────── Calendrier mois ─────────── */
+.calendrier { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.cal-entete {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texte-faible);
+  padding-bottom: 2px;
+}
+.cal-jour {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texte-doux);
+}
+.cal-jour.vide { background: transparent; border-color: transparent; }
+.cal-jour.futur { opacity: 0.35; }
+.cal-jour.aujourdhui { outline: 2px solid var(--or); outline-offset: 1px; }
+.cal-jour b { font-size: 9px; font-weight: 600; opacity: 0.85; }
+
+/* ─────────── Heatmap année ─────────── */
+.heatmap-boite {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+}
+.heatmap { display: flex; gap: 3px; min-width: max-content; }
+.hm-col { display: grid; grid-template-rows: repeat(7, 12px); gap: 3px; }
+.hm-cel { width: 12px; height: 12px; border-radius: 3px; background: var(--surface-2); }
+.hm-cel.hors { background: transparent; }
+.hm-mois {
+  display: flex;
+  gap: 3px;
+  min-width: max-content;
+  font-size: 10px;
+  color: var(--texte-faible);
+  margin-bottom: 4px;
+  height: 14px;
+}
+.hm-mois span { flex: none; }
+.legende {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: flex-end;
+  font-size: 11px;
+  color: var(--texte-faible);
+  margin-top: 8px;
+}
+.legende i { width: 12px; height: 12px; border-radius: 3px; display: block; }
+
+/* Barres par mois */
+.barres-mois { display: grid; gap: 7px; }
+.barre-ligne { display: flex; align-items: center; gap: 10px; }
+.barre-lib { width: 34px; font-size: 11.5px; color: var(--texte-faible); flex: none; text-transform: capitalize; }
+.barre-piste { flex: 1; height: 18px; border-radius: 9px; background: var(--surface-2); overflow: hidden; }
+.barre-piste i { display: block; height: 100%; background: linear-gradient(90deg, var(--or), #ffd166); border-radius: 9px; }
+.barre-val { width: 40px; text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--texte-doux); flex: none; }
+
+/* ─────────── Détail par habitude ─────────── */
+.detail-hab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+  padding: 11px 13px;
+  margin-bottom: 8px;
+}
+.detail-corps { flex: 1; min-width: 0; }
+.detail-haut { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.detail-nom { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.detail-chiffre { font-size: 13px; font-weight: 700; color: var(--or); flex: none; font-variant-numeric: tabular-nums; }
+.detail-sous { font-size: 11.5px; color: var(--texte-faible); margin-top: 1px; }
+.detail-jauge { height: 5px; border-radius: 3px; background: var(--surface-2); margin-top: 7px; overflow: hidden; }
+.detail-jauge i { display: block; height: 100%; border-radius: 3px; background: var(--or); }
+.detail-jauge i.plein { background: var(--vert); }
+
+.vide-message {
+  text-align: center;
+  color: var(--texte-faible);
+  font-size: 14px;
+  padding: 28px 16px;
+  background: var(--surface);
+  border: 1px dashed var(--bordure);
+  border-radius: var(--rayon);
+}
+
+/* ─────────── Modales ─────────── */
+.voile {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(3px);
+}
+.modale {
+  position: fixed;
+  z-index: 50;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fond-2);
+  border: 1px solid var(--bordure);
+  border-radius: 20px 20px 0 0;
+  box-shadow: var(--ombre);
+  animation: monte 0.22s ease-out;
+}
+@keyframes monte { from { transform: translateY(18px); opacity: 0; } }
+@media (min-width: 640px) {
+  .modale {
+    left: 50%;
+    bottom: auto;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 520px;
+    border-radius: 20px;
+    max-height: 82vh;
+  }
+  @keyframes monte { from { opacity: 0; } }
+}
+.modale-entete {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-bottom: 1px solid var(--bordure);
+}
+.modale-entete h2 { font-size: 17px; flex: 1; }
+.modale-corps { padding: 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(16px + var(--bas)); }
+
+.pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--texte-faible);
+  white-space: nowrap;
+  transition: opacity 0.3s;
+}
+.pill.enregistre { background: var(--vert-doux); color: var(--vert); }
+.pill.modifie { background: var(--or-doux); color: var(--or); }
+.pill.erreur { background: var(--rouge-doux); color: var(--rouge); }
+
+.champ { display: block; margin-bottom: 14px; }
+.champ > span { display: block; font-size: 12.5px; color: var(--texte-doux); margin-bottom: 6px; }
+.ligne-champs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.ligne-slider { display: flex; align-items: center; gap: 12px; }
+.ligne-slider input[type="range"] { flex: 1; accent-color: var(--or); }
+.ligne-slider output { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 48px; text-align: right; }
+
+.choix { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.choix-btn {
+  padding: 11px;
+  border-radius: 10px;
+  background: var(--fond-2);
+  border: 1px solid var(--bordure);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texte-faible);
+}
+.choix-btn.actif { background: var(--or-doux); border-color: var(--or); color: var(--or); }
+
+.actions-modale { margin-top: 18px; }
+.aide { font-size: 12px; color: var(--texte-faible); margin: 10px 0 0; }
+
+/* Liste de gestion */
+.liste-gestion { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
+.gestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+  padding: 9px 11px;
+}
+.gestion-item.archivee { opacity: 0.55; }
+.gestion-nom { flex: 1; min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gestion-nom small { display: block; font-size: 11px; color: var(--texte-faible); }
+.btn-mini {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--bordure);
+  color: var(--texte-doux);
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+}
+.btn-mini:disabled { opacity: 0.3; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  z-index: 60;
+  top: calc(14px + var(--haut));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-2);
+  border: 1px solid var(--bordure);
+  color: var(--texte);
+  padding: 11px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: var(--ombre);
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.succes { border-color: rgba(52, 211, 153, 0.5); color: var(--vert); }
+.toast.erreur { border-color: rgba(248, 113, 113, 0.5); color: var(--rouge); }
+
+</style>
+</head>
+<body>
+
+<header class="entete">
+  <div class="entete-titre">
+    <span class="logo" aria-hidden="true">◆</span>
+    <h1>Daily Quest</h1>
+  </div>
+  <button class="btn-icone" id="btn-reglages" type="button" aria-label="Réglages">⚙</button>
+</header>
+
+<main>
+  <!-- ══════════ ONGLET AUJOURD'HUI ══════════ -->
+  <section class="vue" id="vue-jour" aria-label="Journée">
+
+    <div class="nav-periode">
+      <button class="btn-nav" id="jour-prec" type="button" aria-label="Jour précédent">‹</button>
+      <div class="nav-label">
+        <span id="jour-titre">—</span>
+        <small id="jour-sous-titre"></small>
+      </div>
+      <button class="btn-nav" id="jour-suiv" type="button" aria-label="Jour suivant">›</button>
+    </div>
+
+    <div class="carte carte-score">
+      <div class="anneau">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="anneau-fond" cx="60" cy="60" r="52"></circle>
+          <circle class="anneau-jauge" id="anneau-jauge" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="anneau-texte">
+          <strong id="score-pct">0%</strong>
+          <span id="score-frac">0 / 0</span>
+        </div>
+      </div>
+      <div class="stats-jour">
+        <div class="stat">
+          <span class="stat-val" id="stat-serie">0</span>
+          <span class="stat-lib">🔥 Série</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="stat-record">0</span>
+          <span class="stat-lib">🏆 Record</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="stat-niveau">1</span>
+          <span class="stat-lib">⭐ Niveau</span>
+        </div>
+        <div class="barre-xp" title="Progression vers le niveau suivant">
+          <div class="barre-xp-jauge" id="barre-xp"></div>
+          <span id="xp-texte">0 XP</span>
+        </div>
+      </div>
+    </div>
+
+    <ul class="liste-habitudes" id="liste-habitudes"></ul>
+
+    <button class="btn-secondaire pleine-largeur" id="btn-gerer" type="button">
+      Gérer mes habitudes
+    </button>
+  </section>
+
+  <!-- ══════════ ONGLET HISTORIQUE ══════════ -->
+  <section class="vue cachee" id="vue-historique" aria-label="Historique">
+
+    <div class="segments" role="tablist">
+      <button class="segment actif" data-mode="semaine" role="tab" type="button">Semaine</button>
+      <button class="segment" data-mode="mois" role="tab" type="button">Mois</button>
+      <button class="segment" data-mode="annee" role="tab" type="button">Année</button>
+    </div>
+
+    <div class="nav-periode">
+      <button class="btn-nav" id="periode-prec" type="button" aria-label="Période précédente">‹</button>
+      <div class="nav-label">
+        <span id="periode-titre">—</span>
+        <small id="periode-sous-titre"></small>
+      </div>
+      <button class="btn-nav" id="periode-suiv" type="button" aria-label="Période suivante">›</button>
+    </div>
+
+    <div class="carte resume">
+      <div class="resume-item">
+        <span class="resume-val" id="res-moyenne">0%</span>
+        <span class="resume-lib">Moyenne</span>
+      </div>
+      <div class="resume-item">
+        <span class="resume-val" id="res-parfaits">0</span>
+        <span class="resume-lib">Jours 100 %</span>
+      </div>
+      <div class="resume-item">
+        <span class="resume-val" id="res-actifs">0</span>
+        <span class="resume-lib">Jours suivis</span>
+      </div>
+      <div class="resume-item">
+        <span class="resume-val" id="res-total">0</span>
+        <span class="resume-lib">Points validés</span>
+      </div>
+    </div>
+
+    <div id="hist-contenu"></div>
+
+    <h2 class="titre-section">Détail par habitude</h2>
+    <div id="hist-detail"></div>
+  </section>
+</main>
+
+<!-- ══════════ BARRE D'ONGLETS ══════════ -->
+<nav class="onglets" aria-label="Navigation principale">
+  <button class="onglet actif" data-vue="jour" type="button">
+    <span class="onglet-icone">✓</span><span>Aujourd'hui</span>
+  </button>
+  <button class="onglet" data-vue="historique" type="button">
+    <span class="onglet-icone">▦</span><span>Historique</span>
+  </button>
+</nav>
+
+<!-- ══════════ MODALES ══════════ -->
+<div class="voile cachee" id="voile"></div>
+
+<!-- Gestion des habitudes -->
+<div class="modale cachee" id="modale-gestion" role="dialog" aria-modal="true" aria-labelledby="titre-gestion">
+  <div class="modale-entete">
+    <h2 id="titre-gestion">Mes habitudes</h2>
+    <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
+  </div>
+  <div class="modale-corps">
+    <ul class="liste-gestion" id="liste-gestion"></ul>
+    <button class="btn-primaire pleine-largeur" id="btn-ajouter" type="button">+ Ajouter une habitude</button>
+    <p class="aide">Archiver garde l'historique ; supprimer efface aussi les données passées.</p>
+  </div>
+</div>
+
+<!-- Édition d'une habitude -->
+<div class="modale cachee" id="modale-habitude" role="dialog" aria-modal="true" aria-labelledby="titre-habitude">
+  <div class="modale-entete">
+    <h2 id="titre-habitude">Habitude</h2>
+    <span class="pill" id="pill-statut">✓ À jour</span>
+    <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
+  </div>
+  <div class="modale-corps">
+    <label class="champ">
+      <span>Nom</span>
+      <input type="text" id="ch-nom" maxlength="60" placeholder="Ex. Bois 3 litres d'eau" autocomplete="off">
+    </label>
+
+    <label class="champ">
+      <span>Icône</span>
+      <input type="text" id="ch-emoji" maxlength="4" placeholder="💧" autocomplete="off">
+    </label>
+
+    <div class="champ">
+      <span>Type de suivi</span>
+      <div class="choix" id="ch-type">
+        <button class="choix-btn" data-type="bool" type="button">À cocher</button>
+        <button class="choix-btn" data-type="quant" type="button">Quantité</button>
+      </div>
+    </div>
+
+    <div id="bloc-quant">
+      <div class="ligne-champs">
+        <label class="champ">
+          <span>Objectif</span>
+          <input type="number" id="ch-cible" min="0" step="any" inputmode="decimal">
+        </label>
+        <label class="champ">
+          <span>Unité</span>
+          <input type="text" id="ch-unite" maxlength="10" placeholder="min" autocomplete="off">
+        </label>
+        <label class="champ">
+          <span>Pas</span>
+          <input type="number" id="ch-pas" min="0" step="any" inputmode="decimal">
+        </label>
+      </div>
+    </div>
+
+    <div class="actions-modale">
+      <button class="btn-primaire pleine-largeur cachee" id="btn-creer" type="button">Créer l'habitude</button>
+      <button class="btn-danger pleine-largeur cachee" id="btn-supprimer" type="button">Supprimer / archiver</button>
+    </div>
+  </div>
+</div>
+
+<!-- Réglages -->
+<div class="modale cachee" id="modale-reglages" role="dialog" aria-modal="true" aria-labelledby="titre-reglages">
+  <div class="modale-entete">
+    <h2 id="titre-reglages">Réglages</h2>
+    <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
+  </div>
+  <div class="modale-corps">
+    <label class="champ">
+      <span>Objectif pour valider une journée (série 🔥)</span>
+      <div class="ligne-slider">
+        <input type="range" id="ch-objectif" min="50" max="100" step="5">
+        <output id="out-objectif">80 %</output>
+      </div>
+    </label>
+
+    <h3 class="titre-section">Données</h3>
+    <p class="aide">Tout est stocké sur cet appareil. Exporte régulièrement pour ne rien perdre.</p>
+    <button class="btn-secondaire pleine-largeur" id="btn-export" type="button">Exporter une sauvegarde (.json)</button>
+    <button class="btn-secondaire pleine-largeur" id="btn-import" type="button">Importer une sauvegarde</button>
+    <input type="file" id="fichier-import" accept="application/json,.json" hidden>
+    <button class="btn-danger pleine-largeur" id="btn-reinit" type="button">Tout réinitialiser</button>
+    <p class="aide" id="info-stockage"></p>
+  </div>
+</div>
+
+<!-- Confirmation -->
+<div class="modale modale-petite cachee" id="modale-confirm" role="dialog" aria-modal="true" aria-labelledby="confirm-titre">
+  <div class="modale-entete">
+    <h2 id="confirm-titre">Confirmer</h2>
+  </div>
+  <div class="modale-corps">
+    <p id="confirm-message"></p>
+    <div class="actions-modale" id="confirm-actions"></div>
+  </div>
+</div>
+
+<!-- Saisie d'une quantité -->
+<div class="modale modale-petite cachee" id="modale-quantite" role="dialog" aria-modal="true" aria-labelledby="quantite-titre">
+  <div class="modale-entete">
+    <h2 id="quantite-titre">Quantité</h2>
+    <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
+  </div>
+  <div class="modale-corps">
+    <label class="champ">
+      <span id="quantite-lib">Valeur</span>
+      <input type="number" id="ch-quantite" step="any" min="0" inputmode="decimal">
+    </label>
+    <button class="btn-primaire pleine-largeur" id="btn-valider-quantite" type="button">Valider</button>
+  </div>
+</div>
+
+<div class="toast cachee" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   Daily Quest — logique de l'application
+   Données 100 % locales (localStorage), historique illimité.
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─────────────── Constantes ─────────────── */
+
+  const CLE_STOCKAGE = 'dq.v1';
+  const CLE_BROUILLON = 'dq.brouillon';
+  const XP_PAR_NIVEAU = 50;
+
+  const JOURS_COURTS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  const MOIS_NOMS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  const MOIS_COURTS = ['jan', 'fév', 'mar', 'avr', 'mai', 'juin',
+    'juil', 'août', 'sep', 'oct', 'nov', 'déc'];
+
+  const HABITUDES_DEFAUT = [
+    { nom: "Pas d'alcool", emoji: '🚫', type: 'bool' },
+    { nom: 'Sommeil', emoji: '😴', type: 'quant', cible: 8, unite: 'h', pas: 0.5 },
+    { nom: 'Trouve un mentor', emoji: '🧭', type: 'bool' },
+    { nom: 'Exercice', emoji: '💪', type: 'bool' },
+    { nom: 'Marche', emoji: '👟', type: 'quant', cible: 10000, unite: 'pas', pas: 500 },
+    { nom: 'Rien à manger après 22 h', emoji: '🍽️', type: 'bool' },
+    { nom: 'Zéro aliment transformé', emoji: '🥦', type: 'bool' },
+    { nom: "Pas d'écrans après 21 h", emoji: '📵', type: 'bool' },
+    { nom: 'Loin des personnes toxiques', emoji: '🛡️', type: 'bool' },
+    { nom: 'Lecture', emoji: '📚', type: 'quant', cible: 30, unite: 'min', pas: 5 },
+    { nom: 'Eau', emoji: '💧', type: 'quant', cible: 3, unite: 'L', pas: 0.25 },
+    { nom: 'Méditation', emoji: '🧘', type: 'quant', cible: 10, unite: 'min', pas: 5 }
+  ];
+
+  /* ─────────────── Utilitaires de date ─────────────── */
+
+  const pad = (n) => String(n).padStart(2, '0');
+
+  function cleDe(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function dateDe(cle) {
+    const [a, m, j] = cle.split('-').map(Number);
+    return new Date(a, m - 1, j);
+  }
+  function aujourdHui() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  function ajouterJours(d, n) {
+    const c = new Date(d);
+    c.setDate(c.getDate() + n);
+    c.setHours(0, 0, 0, 0);
+    return c;
+  }
+  function debutSemaine(d) {
+    const c = new Date(d);
+    c.setDate(c.getDate() - ((c.getDay() + 6) % 7));
+    c.setHours(0, 0, 0, 0);
+    return c;
+  }
+  function memeJour(a, b) {
+    return cleDe(a) === cleDe(b);
+  }
+  function numeroSemaine(d) {
+    const c = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    c.setDate(c.getDate() + 3 - ((c.getDay() + 6) % 7));
+    const premier = new Date(c.getFullYear(), 0, 4);
+    return 1 + Math.round(((c - premier) / 86400000 - 3 + ((premier.getDay() + 6) % 7)) / 7);
+  }
+
+  /* ─────────────── Formatage ─────────────── */
+
+  function fmt(n) {
+    if (!isFinite(n)) return '0';
+    return Number(n).toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+  }
+  function majuscule(texte) {
+    return texte ? texte.charAt(0).toUpperCase() + texte.slice(1) : texte;
+  }
+  function fmtDateLongue(d) {
+    return majuscule(d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
+  }
+
+  /* ─────────────── État ─────────────── */
+
+  let etat = null;
+
+  function etatParDefaut() {
+    return {
+      version: 1,
+      habitudes: HABITUDES_DEFAUT.map((h, i) => Object.assign({
+        id: 'h' + (i + 1),
+        archivee: false
+      }, h)),
+      jours: {},
+      reglages: { objectif: 80 }
+    };
+  }
+
+  function charger() {
+    try {
+      const brut = localStorage.getItem(CLE_STOCKAGE);
+      if (!brut) return etatParDefaut();
+      const donnees = JSON.parse(brut);
+      if (!donnees || !Array.isArray(donnees.habitudes)) return etatParDefaut();
+      donnees.jours = donnees.jours || {};
+      donnees.reglages = Object.assign({ objectif: 80 }, donnees.reglages);
+      return donnees;
+    } catch (e) {
+      console.error('Lecture du stockage impossible', e);
+      return etatParDefaut();
+    }
+  }
+
+  function sauver() {
+    try {
+      localStorage.setItem(CLE_STOCKAGE, JSON.stringify(etat));
+      return true;
+    } catch (e) {
+      console.error('Écriture impossible', e);
+      toast("Impossible d'enregistrer (stockage plein ?)", 'erreur');
+      return false;
+    }
+  }
+
+  function nouvelId() {
+    return 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  /* ─────────────── Calculs métier ─────────────── */
+
+  function habitudesActives() {
+    return etat.habitudes.filter((h) => !h.archivee);
+  }
+
+  function valeursDu(cle) {
+    return etat.jours[cle] || {};
+  }
+
+  function valeurBrute(h, valeurs) {
+    const v = valeurs[h.id];
+    if (h.type === 'quant') return typeof v === 'number' ? v : 0;
+    return v === true;
+  }
+
+  function estFaite(h, valeurs) {
+    if (h.type === 'quant') {
+      const cible = h.cible || 0;
+      const valeur = valeurBrute(h, valeurs);
+      return cible > 0 ? valeur >= cible : valeur > 0;
+    }
+    return valeurs[h.id] === true;
+  }
+
+  function progression(h, valeurs) {
+    if (h.type !== 'quant') return estFaite(h, valeurs) ? 1 : 0;
+    const cible = h.cible || 0;
+    if (cible <= 0) return valeurBrute(h, valeurs) > 0 ? 1 : 0;
+    return Math.min(1, valeurBrute(h, valeurs) / cible);
+  }
+
+  /** Le jour contient-il au moins une donnée saisie ? */
+  function jourRenseigne(cle) {
+    const v = etat.jours[cle];
+    if (!v) return false;
+    return Object.keys(v).some((k) => v[k] === true || (typeof v[k] === 'number' && v[k] > 0));
+  }
+
+  function scoreJour(cle, habitudes) {
+    const habs = habitudes || habitudesActives();
+    const valeurs = valeursDu(cle);
+    const total = habs.length;
+    let faits = 0;
+    habs.forEach((h) => { if (estFaite(h, valeurs)) faits++; });
+    return { faits: faits, total: total, pct: total ? faits / total : 0, vide: !jourRenseigne(cle) };
+  }
+
+  function objectifAtteint(cle, habitudes) {
+    const s = scoreJour(cle, habitudes);
+    if (s.vide) return false;
+    return s.pct * 100 >= etat.reglages.objectif;
+  }
+
+  function serieActuelle() {
+    const habs = habitudesActives();
+    let d = aujourdHui();
+    // La journée en cours ne casse pas la série tant qu'elle n'est pas terminée.
+    if (!objectifAtteint(cleDe(d), habs)) d = ajouterJours(d, -1);
+    let n = 0;
+    while (objectifAtteint(cleDe(d), habs)) {
+      n++;
+      d = ajouterJours(d, -1);
+    }
+    return n;
+  }
+
+  function meilleureSerie() {
+    const cles = Object.keys(etat.jours).sort();
+    if (!cles.length) return 0;
+    const habs = habitudesActives();
+    let d = dateDe(cles[0]);
+    const fin = aujourdHui();
+    let courante = 0;
+    let record = 0;
+    while (d <= fin) {
+      if (objectifAtteint(cleDe(d), habs)) {
+        courante++;
+        if (courante > record) record = courante;
+      } else {
+        courante = 0;
+      }
+      d = ajouterJours(d, 1);
+    }
+    return record;
+  }
+
+  function xpTotal() {
+    const habs = habitudesActives();
+    return Object.keys(etat.jours).reduce((somme, cle) => somme + scoreJour(cle, habs).faits, 0);
+  }
+
+  /**
+   * Agrège les données sur une liste de jours.
+   * @returns {{jours:Array, moyenne:number, parfaits:number, suivis:number, points:number, parHabitude:Array}}
+   */
+  function agreger(cles) {
+    const habs = habitudesActives();
+    const jours = cles.map((c) => Object.assign({ cle: c }, scoreJour(c, habs)));
+    const suivis = jours.filter((j) => !j.vide);
+    const parfaits = suivis.filter((j) => j.pct >= 1).length;
+    const points = jours.reduce((s, j) => s + j.faits, 0);
+    const moyenne = suivis.length
+      ? suivis.reduce((s, j) => s + j.pct, 0) / suivis.length
+      : 0;
+
+    const parHabitude = habs.map((h) => {
+      let reussis = 0;
+      let somme = 0;
+      cles.forEach((c) => {
+        const valeurs = valeursDu(c);
+        if (estFaite(h, valeurs)) reussis++;
+        if (h.type === 'quant') somme += valeurBrute(h, valeurs);
+      });
+      return {
+        habitude: h,
+        reussis: reussis,
+        somme: somme,
+        base: suivis.length || cles.length,
+        pct: (suivis.length || cles.length) ? reussis / (suivis.length || cles.length) : 0
+      };
+    });
+
+    return {
+      jours: jours,
+      moyenne: moyenne,
+      parfaits: parfaits,
+      suivis: suivis.length,
+      points: points,
+      parHabitude: parHabitude
+    };
+  }
+
+  /* ─────────────── Écriture des valeurs ─────────────── */
+
+  function definirValeur(cle, habitudeId, valeur) {
+    const jour = etat.jours[cle] ? Object.assign({}, etat.jours[cle]) : {};
+    if (valeur === false || valeur === 0 || valeur === null || valeur === undefined) {
+      delete jour[habitudeId];
+    } else {
+      jour[habitudeId] = valeur;
+    }
+    if (Object.keys(jour).length === 0) delete etat.jours[cle];
+    else etat.jours[cle] = jour;
+    sauver();
+  }
+
+  /* ─────────────── Vue : couleurs ─────────────── */
+
+  function couleurJour(score) {
+    if (score.vide) return 'var(--surface-2)';
+    if (score.pct <= 0) return 'var(--surface-2)';
+    const alpha = (0.18 + 0.72 * score.pct).toFixed(2);
+    return 'rgba(52, 211, 153, ' + alpha + ')';
+  }
+  function texteSurJour(score) {
+    return !score.vide && score.pct >= 0.6 ? '#04240f' : 'var(--texte-doux)';
+  }
+
+  /* ─────────────── DOM ─────────────── */
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.prototype.slice.call(document.querySelectorAll(sel));
+
+  let jourCourant = aujourdHui();
+  let modeHistorique = 'semaine';
+  let ancreHistorique = aujourdHui();
+
+  /* ─────────────── Onglet Aujourd'hui ─────────────── */
+
+  function rendreJour() {
+    const cle = cleDe(jourCourant);
+    const habs = habitudesActives();
+    const valeurs = valeursDu(cle);
+    const score = scoreJour(cle, habs);
+
+    // En-tête de date
+    $('#jour-titre').textContent = fmtDateLongue(jourCourant);
+    const estAujourdHui = memeJour(jourCourant, aujourdHui());
+    const hier = memeJour(jourCourant, ajouterJours(aujourdHui(), -1));
+    $('#jour-sous-titre').textContent = estAujourdHui
+      ? "Aujourd'hui · " + jourCourant.getFullYear()
+      : hier ? 'Hier · ' + jourCourant.getFullYear() : String(jourCourant.getFullYear());
+    $('#jour-suiv').disabled = estAujourdHui;
+
+    // Anneau de progression
+    const circonference = 2 * Math.PI * 52;
+    const jauge = $('#anneau-jauge');
+    jauge.style.strokeDashoffset = String(circonference * (1 - score.pct));
+    jauge.classList.toggle('complet', score.pct >= 1);
+    $('#score-pct').textContent = Math.round(score.pct * 100) + '%';
+    $('#score-frac').textContent = score.faits + ' / ' + score.total;
+
+    // Statistiques
+    const xp = xpTotal();
+    const niveau = Math.floor(xp / XP_PAR_NIVEAU) + 1;
+    const dansNiveau = xp % XP_PAR_NIVEAU;
+    $('#stat-serie').textContent = serieActuelle();
+    $('#stat-record').textContent = meilleureSerie();
+    $('#stat-niveau').textContent = niveau;
+    $('#barre-xp').style.width = (dansNiveau / XP_PAR_NIVEAU * 100) + '%';
+    $('#xp-texte').textContent = dansNiveau + ' / ' + XP_PAR_NIVEAU + ' XP → niv. ' + (niveau + 1);
+
+    // Liste des habitudes
+    const liste = $('#liste-habitudes');
+    liste.innerHTML = '';
+
+    if (!habs.length) {
+      const vide = document.createElement('li');
+      vide.className = 'vide-message';
+      vide.textContent = 'Aucune habitude active. Ajoutes-en depuis « Gérer mes habitudes ».';
+      liste.appendChild(vide);
+      return;
+    }
+
+    habs.forEach((h) => {
+      const fait = estFaite(h, valeurs);
+      const li = document.createElement('li');
+      li.className = 'habitude' + (fait ? ' faite' : '');
+      li.dataset.id = h.id;
+
+      const emoji = document.createElement('div');
+      emoji.className = 'hab-emoji';
+      emoji.textContent = h.emoji || '•';
+      li.appendChild(emoji);
+
+      const infos = document.createElement('div');
+      infos.className = 'hab-infos';
+      const nom = document.createElement('div');
+      nom.className = 'hab-nom';
+      nom.textContent = h.nom;
+      infos.appendChild(nom);
+
+      if (h.type === 'quant') {
+        const detail = document.createElement('div');
+        detail.className = 'hab-detail';
+        detail.textContent = 'Objectif ' + fmt(h.cible) + ' ' + (h.unite || '');
+        infos.appendChild(detail);
+
+        const jaugeH = document.createElement('div');
+        jaugeH.className = 'hab-jauge';
+        const barre = document.createElement('i');
+        barre.style.width = (progression(h, valeurs) * 100) + '%';
+        jaugeH.appendChild(barre);
+        infos.appendChild(jaugeH);
+      }
+      li.appendChild(infos);
+
+      if (h.type === 'quant') {
+        const zone = document.createElement('div');
+        zone.className = 'hab-quant';
+
+        const moins = document.createElement('button');
+        moins.className = 'btn-pas';
+        moins.type = 'button';
+        moins.dataset.action = 'moins';
+        moins.setAttribute('aria-label', 'Retirer');
+        moins.textContent = '−';
+
+        const val = document.createElement('button');
+        val.className = 'hab-valeur';
+        val.type = 'button';
+        val.dataset.action = 'saisir';
+        val.textContent = fmt(valeurBrute(h, valeurs)) + (h.unite ? ' ' + h.unite : '');
+
+        const plus = document.createElement('button');
+        plus.className = 'btn-pas';
+        plus.type = 'button';
+        plus.dataset.action = 'plus';
+        plus.setAttribute('aria-label', 'Ajouter');
+        plus.textContent = '+';
+
+        zone.appendChild(moins);
+        zone.appendChild(val);
+        zone.appendChild(plus);
+        li.appendChild(zone);
+      } else {
+        const coche = document.createElement('button');
+        coche.className = 'hab-coche';
+        coche.type = 'button';
+        coche.dataset.action = 'basculer';
+        coche.setAttribute('aria-label', (fait ? 'Décocher ' : 'Cocher ') + h.nom);
+        coche.setAttribute('aria-pressed', String(fait));
+        coche.textContent = '✓';
+        li.appendChild(coche);
+      }
+
+      liste.appendChild(li);
+    });
+  }
+
+  function surClicHabitude(evt) {
+    const bouton = evt.target.closest('[data-action]');
+    if (!bouton) return;
+    const li = bouton.closest('.habitude');
+    if (!li) return;
+
+    const h = etat.habitudes.find((x) => x.id === li.dataset.id);
+    if (!h) return;
+
+    const cle = cleDe(jourCourant);
+    const valeurs = valeursDu(cle);
+    const action = bouton.dataset.action;
+
+    if (action === 'basculer') {
+      definirValeur(cle, h.id, !(valeurs[h.id] === true));
+    } else if (action === 'plus' || action === 'moins') {
+      const pas = h.pas > 0 ? h.pas : 1;
+      const delta = action === 'plus' ? pas : -pas;
+      const brut = valeurBrute(h, valeurs) + delta;
+      const arrondi = Math.max(0, Math.round(brut * 1000) / 1000);
+      definirValeur(cle, h.id, arrondi);
+    } else if (action === 'saisir') {
+      ouvrirSaisieQuantite(h, valeurBrute(h, valeurs));
+      return;
+    }
+    rendreJour();
+  }
+
+  /* ─────────────── Saisie manuelle d'une quantité ─────────────── */
+
+  let habitudeEnSaisie = null;
+
+  function ouvrirSaisieQuantite(h, valeur) {
+    habitudeEnSaisie = h;
+    $('#quantite-titre').textContent = h.nom;
+    $('#quantite-lib').textContent = 'Valeur en ' + (h.unite || 'unités') +
+      ' (objectif ' + fmt(h.cible) + ')';
+    const champ = $('#ch-quantite');
+    champ.value = valeur || '';
+    ouvrirModale('#modale-quantite');
+    setTimeout(() => { champ.focus(); champ.select(); }, 80);
+  }
+
+  function validerSaisieQuantite() {
+    if (!habitudeEnSaisie) return;
+    const brut = parseFloat(String($('#ch-quantite').value).replace(',', '.'));
+    const valeur = isFinite(brut) && brut > 0 ? Math.round(brut * 1000) / 1000 : 0;
+    definirValeur(cleDe(jourCourant), habitudeEnSaisie.id, valeur);
+    habitudeEnSaisie = null;
+    fermerModales();
+    rendreJour();
+  }
+
+  /* ─────────────── Onglet Historique ─────────────── */
+
+  function clesDePeriode() {
+    const cles = [];
+    if (modeHistorique === 'semaine') {
+      const debut = debutSemaine(ancreHistorique);
+      for (let i = 0; i < 7; i++) cles.push(cleDe(ajouterJours(debut, i)));
+    } else if (modeHistorique === 'mois') {
+      const a = ancreHistorique.getFullYear();
+      const m = ancreHistorique.getMonth();
+      const nb = new Date(a, m + 1, 0).getDate();
+      for (let i = 1; i <= nb; i++) cles.push(cleDe(new Date(a, m, i)));
+    } else {
+      const a = ancreHistorique.getFullYear();
+      let d = new Date(a, 0, 1);
+      while (d.getFullYear() === a) {
+        cles.push(cleDe(d));
+        d = ajouterJours(d, 1);
+      }
+    }
+    return cles;
+  }
+
+  function decalerPeriode(sens) {
+    if (modeHistorique === 'semaine') {
+      ancreHistorique = ajouterJours(ancreHistorique, 7 * sens);
+    } else if (modeHistorique === 'mois') {
+      ancreHistorique = new Date(ancreHistorique.getFullYear(), ancreHistorique.getMonth() + sens, 1);
+    } else {
+      ancreHistorique = new Date(ancreHistorique.getFullYear() + sens, 0, 1);
+    }
+    rendreHistorique();
+  }
+
+  function periodeEstCourante() {
+    const auj = aujourdHui();
+    if (modeHistorique === 'semaine') return memeJour(debutSemaine(ancreHistorique), debutSemaine(auj));
+    if (modeHistorique === 'mois') {
+      return ancreHistorique.getFullYear() === auj.getFullYear() &&
+        ancreHistorique.getMonth() === auj.getMonth();
+    }
+    return ancreHistorique.getFullYear() === auj.getFullYear();
+  }
+
+  function rendreHistorique() {
+    const cles = clesDePeriode();
+    const donnees = agreger(cles);
+
+    // Titre de période
+    if (modeHistorique === 'semaine') {
+      const debut = debutSemaine(ancreHistorique);
+      const fin = ajouterJours(debut, 6);
+      const memeMois = debut.getMonth() === fin.getMonth();
+      $('#periode-titre').textContent = debut.getDate() + (memeMois ? '' : ' ' + MOIS_COURTS[debut.getMonth()]) +
+        ' – ' + fin.getDate() + ' ' + MOIS_NOMS[fin.getMonth()];
+      $('#periode-sous-titre').textContent = 'Semaine ' + numeroSemaine(debut) + ' · ' + fin.getFullYear();
+    } else if (modeHistorique === 'mois') {
+      $('#periode-titre').textContent = majuscule(MOIS_NOMS[ancreHistorique.getMonth()]) + ' ' + ancreHistorique.getFullYear();
+      $('#periode-sous-titre').textContent = cles.length + ' jours';
+    } else {
+      $('#periode-titre').textContent = String(ancreHistorique.getFullYear());
+      $('#periode-sous-titre').textContent = cles.length + ' jours';
+    }
+    $('#periode-suiv').disabled = periodeEstCourante();
+
+    // Résumé
+    $('#res-moyenne').textContent = Math.round(donnees.moyenne * 100) + '%';
+    $('#res-parfaits').textContent = donnees.parfaits;
+    $('#res-actifs').textContent = donnees.suivis;
+    $('#res-total').textContent = fmt(donnees.points);
+
+    // Contenu principal
+    const boite = $('#hist-contenu');
+    boite.innerHTML = '';
+    if (modeHistorique === 'semaine') boite.appendChild(vueSemaine(cles));
+    else if (modeHistorique === 'mois') boite.appendChild(vueMois(cles));
+    else boite.appendChild(vueAnnee(cles));
+
+    // Détail par habitude
+    rendreDetailHabitudes(donnees);
+  }
+
+  function vueSemaine(cles) {
+    const carte = document.createElement('div');
+    carte.className = 'carte grille-semaine';
+
+    const habs = habitudesActives();
+    if (!habs.length) {
+      carte.className = 'vide-message';
+      carte.textContent = 'Aucune habitude active.';
+      return carte;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'tab-semaine';
+
+    const thead = document.createElement('thead');
+    const trh = document.createElement('tr');
+    const vide = document.createElement('th');
+    vide.className = 'col-hab';
+    trh.appendChild(vide);
+    cles.forEach((c, i) => {
+      const d = dateDe(c);
+      const th = document.createElement('th');
+      if (memeJour(d, aujourdHui())) th.className = 'aujourdhui';
+      th.innerHTML = JOURS_COURTS[i] + '<small>' + d.getDate() + '</small>';
+      trh.appendChild(th);
+    });
+    thead.appendChild(trh);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    habs.forEach((h) => {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.className = 'cel-hab';
+      td.innerHTML = '<span class="e">' + (h.emoji || '•') + '</span>';
+      td.appendChild(document.createTextNode(h.nom));
+      tr.appendChild(td);
+
+      cles.forEach((c) => {
+        const valeurs = valeursDu(c);
+        const cellule = document.createElement('td');
+        const p = document.createElement('div');
+        const prog = progression(h, valeurs);
+        if (estFaite(h, valeurs)) {
+          p.className = 'pastille ok';
+          p.textContent = '✓';
+          p.title = h.nom + ' — validé';
+        } else if (prog > 0) {
+          p.className = 'pastille partiel';
+          p.textContent = Math.round(prog * 100) + '%';
+          p.title = h.nom + ' — ' + Math.round(prog * 100) + ' %';
+        } else {
+          p.className = 'pastille';
+        }
+        cellule.appendChild(p);
+        tr.appendChild(cellule);
+      });
+      tbody.appendChild(tr);
+    });
+
+    // Ligne de total par jour
+    const trTotal = document.createElement('tr');
+    trTotal.className = 'ligne-total';
+    const tdVide = document.createElement('td');
+    tdVide.className = 'cel-hab';
+    tdVide.textContent = 'Total';
+    trTotal.appendChild(tdVide);
+    cles.forEach((c) => {
+      const s = scoreJour(c, habs);
+      const td = document.createElement('td');
+      td.className = 'total-jour';
+      td.textContent = s.vide ? '–' : s.faits + '/' + s.total;
+      trTotal.appendChild(td);
+    });
+    tbody.appendChild(trTotal);
+
+    table.appendChild(tbody);
+    carte.appendChild(table);
+    return carte;
+  }
+
+  function vueMois(cles) {
+    const carte = document.createElement('div');
+    carte.className = 'carte';
+
+    const grille = document.createElement('div');
+    grille.className = 'calendrier';
+
+    JOURS_COURTS.forEach((j) => {
+      const e = document.createElement('div');
+      e.className = 'cal-entete';
+      e.textContent = j[0];
+      grille.appendChild(e);
+    });
+
+    const premier = dateDe(cles[0]);
+    const decalage = (premier.getDay() + 6) % 7;
+    for (let i = 0; i < decalage; i++) {
+      const c = document.createElement('div');
+      c.className = 'cal-jour vide';
+      grille.appendChild(c);
+    }
+
+    const habs = habitudesActives();
+    const auj = aujourdHui();
+    cles.forEach((cle) => {
+      const d = dateDe(cle);
+      const s = scoreJour(cle, habs);
+      const cellule = document.createElement('button');
+      cellule.type = 'button';
+      cellule.className = 'cal-jour' +
+        (d > auj ? ' futur' : '') +
+        (memeJour(d, auj) ? ' aujourdhui' : '');
+      cellule.style.background = couleurJour(s);
+      cellule.style.color = texteSurJour(s);
+      cellule.dataset.cle = cle;
+      cellule.title = fmtDateLongue(d) + ' — ' + (s.vide ? 'aucune donnée' : s.faits + '/' + s.total);
+
+      const num = document.createElement('span');
+      num.textContent = d.getDate();
+      cellule.appendChild(num);
+      if (!s.vide) {
+        const pct = document.createElement('b');
+        pct.textContent = Math.round(s.pct * 100) + '%';
+        cellule.appendChild(pct);
+      }
+      grille.appendChild(cellule);
+    });
+
+    grille.addEventListener('click', (evt) => {
+      const cellule = evt.target.closest('.cal-jour[data-cle]');
+      if (!cellule) return;
+      const d = dateDe(cellule.dataset.cle);
+      if (d > aujourdHui()) return;
+      jourCourant = d;
+      basculerVue('jour');
+      rendreJour();
+    });
+
+    carte.appendChild(grille);
+    carte.appendChild(legende());
+    return carte;
+  }
+
+  function vueAnnee(cles) {
+    const fragment = document.createDocumentFragment();
+    const habs = habitudesActives();
+    const annee = ancreHistorique.getFullYear();
+
+    // ── Heatmap type « contributions »
+    const carte = document.createElement('div');
+    carte.className = 'carte';
+
+    const boite = document.createElement('div');
+    boite.className = 'heatmap-boite';
+
+    const debut = debutSemaine(new Date(annee, 0, 1));
+    const finAnnee = new Date(annee, 11, 31);
+
+    const ligneMois = document.createElement('div');
+    ligneMois.className = 'hm-mois';
+    const heatmap = document.createElement('div');
+    heatmap.className = 'heatmap';
+
+    let curseur = debut;
+    let dernierMois = -1;
+    while (curseur <= finAnnee) {
+      const colonne = document.createElement('div');
+      colonne.className = 'hm-col';
+
+      const etiquette = document.createElement('span');
+      etiquette.style.width = '12px';
+      const moisColonne = ajouterJours(curseur, 6).getMonth();
+      if (ajouterJours(curseur, 6).getFullYear() === annee && moisColonne !== dernierMois) {
+        etiquette.textContent = MOIS_COURTS[moisColonne];
+        dernierMois = moisColonne;
+      }
+      ligneMois.appendChild(etiquette);
+
+      for (let i = 0; i < 7; i++) {
+        const d = ajouterJours(curseur, i);
+        const cel = document.createElement('div');
+        if (d.getFullYear() !== annee) {
+          cel.className = 'hm-cel hors';
+        } else {
+          const s = scoreJour(cleDe(d), habs);
+          cel.className = 'hm-cel';
+          cel.style.background = couleurJour(s);
+          cel.title = fmtDateLongue(d) + ' — ' + (s.vide ? 'aucune donnée' : s.faits + '/' + s.total);
+        }
+        colonne.appendChild(cel);
+      }
+      heatmap.appendChild(colonne);
+      curseur = ajouterJours(curseur, 7);
+    }
+
+    boite.appendChild(ligneMois);
+    boite.appendChild(heatmap);
+    carte.appendChild(boite);
+    carte.appendChild(legende());
+    fragment.appendChild(carte);
+
+    // ── Moyenne mensuelle
+    const titre = document.createElement('h2');
+    titre.className = 'titre-section';
+    titre.textContent = 'Moyenne par mois';
+    fragment.appendChild(titre);
+
+    const carteMois = document.createElement('div');
+    carteMois.className = 'carte';
+    const barres = document.createElement('div');
+    barres.className = 'barres-mois';
+
+    for (let m = 0; m < 12; m++) {
+      const nb = new Date(annee, m + 1, 0).getDate();
+      const clesMois = [];
+      for (let i = 1; i <= nb; i++) clesMois.push(cleDe(new Date(annee, m, i)));
+      const agg = agreger(clesMois);
+
+      const ligne = document.createElement('div');
+      ligne.className = 'barre-ligne';
+
+      const lib = document.createElement('span');
+      lib.className = 'barre-lib';
+      lib.textContent = MOIS_COURTS[m];
+
+      const piste = document.createElement('div');
+      piste.className = 'barre-piste';
+      const remplissage = document.createElement('i');
+      remplissage.style.width = (agg.moyenne * 100).toFixed(1) + '%';
+      piste.appendChild(remplissage);
+
+      const val = document.createElement('span');
+      val.className = 'barre-val';
+      val.textContent = agg.suivis ? Math.round(agg.moyenne * 100) + '%' : '–';
+
+      ligne.appendChild(lib);
+      ligne.appendChild(piste);
+      ligne.appendChild(val);
+      barres.appendChild(ligne);
+    }
+    carteMois.appendChild(barres);
+    fragment.appendChild(carteMois);
+
+    const conteneur = document.createElement('div');
+    conteneur.appendChild(fragment);
+    return conteneur;
+  }
+
+  function legende() {
+    const l = document.createElement('div');
+    l.className = 'legende';
+    l.appendChild(document.createTextNode('moins'));
+    [0, 0.25, 0.5, 0.75, 1].forEach((p) => {
+      const i = document.createElement('i');
+      i.style.background = couleurJour({ pct: p, vide: p === 0 });
+      l.appendChild(i);
+    });
+    l.appendChild(document.createTextNode('plus'));
+    return l;
+  }
+
+  function rendreDetailHabitudes(donnees) {
+    const boite = $('#hist-detail');
+    boite.innerHTML = '';
+
+    if (!donnees.parHabitude.length) {
+      const vide = document.createElement('div');
+      vide.className = 'vide-message';
+      vide.textContent = 'Aucune habitude active.';
+      boite.appendChild(vide);
+      return;
+    }
+
+    donnees.parHabitude.forEach((d) => {
+      const h = d.habitude;
+      const item = document.createElement('div');
+      item.className = 'detail-hab';
+
+      const emoji = document.createElement('div');
+      emoji.className = 'hab-emoji';
+      emoji.textContent = h.emoji || '•';
+      item.appendChild(emoji);
+
+      const corps = document.createElement('div');
+      corps.className = 'detail-corps';
+
+      const haut = document.createElement('div');
+      haut.className = 'detail-haut';
+      const nom = document.createElement('span');
+      nom.className = 'detail-nom';
+      nom.textContent = h.nom;
+      const chiffre = document.createElement('span');
+      chiffre.className = 'detail-chiffre';
+      chiffre.textContent = h.type === 'quant'
+        ? fmt(d.somme) + ' ' + (h.unite || '')
+        : d.reussis + ' j';
+      haut.appendChild(nom);
+      haut.appendChild(chiffre);
+      corps.appendChild(haut);
+
+      const sous = document.createElement('div');
+      sous.className = 'detail-sous';
+      const base = donnees.suivis || 0;
+      if (h.type === 'quant') {
+        const moyenne = base ? d.somme / base : 0;
+        sous.textContent = 'Objectif atteint ' + d.reussis + '/' + base + ' j · ' +
+          fmt(Math.round(moyenne * 100) / 100) + ' ' + (h.unite || '') + '/j en moyenne';
+      } else {
+        sous.textContent = 'Validé ' + d.reussis + '/' + base + ' j · ' +
+          Math.round(d.pct * 100) + ' %';
+      }
+      corps.appendChild(sous);
+
+      const jauge = document.createElement('div');
+      jauge.className = 'detail-jauge';
+      const rempli = document.createElement('i');
+      rempli.style.width = (Math.min(1, d.pct) * 100).toFixed(1) + '%';
+      if (d.pct >= 1) rempli.className = 'plein';
+      jauge.appendChild(rempli);
+      corps.appendChild(jauge);
+
+      item.appendChild(corps);
+      boite.appendChild(item);
+    });
+  }
+
+  /* ─────────────── Navigation entre onglets ─────────────── */
+
+  function basculerVue(nom) {
+    $$('.onglet').forEach((o) => o.classList.toggle('actif', o.dataset.vue === nom));
+    $('#vue-jour').classList.toggle('cachee', nom !== 'jour');
+    $('#vue-historique').classList.toggle('cachee', nom !== 'historique');
+    window.scrollTo(0, 0);
+    if (nom === 'historique') rendreHistorique();
+  }
+
+  /* ─────────────── Modales ─────────────── */
+
+  function ouvrirModale(sel) {
+    $('#voile').classList.remove('cachee');
+    $(sel).classList.remove('cachee');
+  }
+  function fermerModales() {
+    $$('.modale').forEach((m) => m.classList.add('cachee'));
+    $('#voile').classList.add('cachee');
+  }
+
+  /**
+   * Boîte de confirmation. Les autres modales sont masquées pour éviter
+   * l'empilement ; `retour` est celle à rouvrir si l'utilisateur annule.
+   */
+  function confirmer(message, actions, retour) {
+    $$('.modale').forEach((m) => m.classList.add('cachee'));
+    $('#confirm-message').textContent = message;
+    const boite = $('#confirm-actions');
+    boite.innerHTML = '';
+    actions.forEach((a) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = (a.classe || 'btn-secondaire') + ' pleine-largeur';
+      b.textContent = a.libelle;
+      b.addEventListener('click', () => {
+        fermerModales();
+        if (a.action) a.action();
+      });
+      boite.appendChild(b);
+    });
+    const annuler = document.createElement('button');
+    annuler.type = 'button';
+    annuler.className = 'btn-secondaire pleine-largeur';
+    annuler.textContent = 'Annuler';
+    annuler.addEventListener('click', () => {
+      fermerModales();
+      if (retour) ouvrirModale(retour);
+    });
+    boite.appendChild(annuler);
+    ouvrirModale('#modale-confirm');
+  }
+
+  function toast(message, type) {
+    const t = $('#toast');
+    t.textContent = message;
+    t.className = 'toast' + (type ? ' ' + type : '');
+    clearTimeout(t._minuteur);
+    t._minuteur = setTimeout(() => t.classList.add('cachee'), 2600);
+  }
+
+  /* ─────────────── Gestion des habitudes ─────────────── */
+
+  function rendreGestion() {
+    const liste = $('#liste-gestion');
+    liste.innerHTML = '';
+
+    etat.habitudes.forEach((h, index) => {
+      const li = document.createElement('li');
+      li.className = 'gestion-item' + (h.archivee ? ' archivee' : '');
+
+      const emoji = document.createElement('div');
+      emoji.className = 'hab-emoji';
+      emoji.textContent = h.emoji || '•';
+      li.appendChild(emoji);
+
+      const nom = document.createElement('div');
+      nom.className = 'gestion-nom';
+      nom.textContent = h.nom;
+      const petit = document.createElement('small');
+      petit.textContent = (h.type === 'quant'
+        ? 'Objectif ' + fmt(h.cible) + ' ' + (h.unite || '')
+        : 'À cocher') + (h.archivee ? ' · archivée' : '');
+      nom.appendChild(petit);
+      li.appendChild(nom);
+
+      const haut = boutonMini('↑', 'Monter', index === 0, () => deplacer(index, -1));
+      const bas = boutonMini('↓', 'Descendre', index === etat.habitudes.length - 1, () => deplacer(index, 1));
+      const modifier = boutonMini('✎', 'Modifier', false, () => ouvrirEditeur(h.id));
+      li.appendChild(haut);
+      li.appendChild(bas);
+      li.appendChild(modifier);
+
+      liste.appendChild(li);
+    });
+  }
+
+  function boutonMini(texte, libelle, desactive, action) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn-mini';
+    b.textContent = texte;
+    b.setAttribute('aria-label', libelle);
+    b.disabled = desactive;
+    b.addEventListener('click', action);
+    return b;
+  }
+
+  function deplacer(index, sens) {
+    const cible = index + sens;
+    if (cible < 0 || cible >= etat.habitudes.length) return;
+    const copie = etat.habitudes.slice();
+    const tmp = copie[index];
+    copie[index] = copie[cible];
+    copie[cible] = tmp;
+    etat.habitudes = copie;
+    sauver();
+    rendreGestion();
+    rendreJour();
+  }
+
+  /* ─────────────── Éditeur d'habitude ─────────────── */
+
+  let habitudeEditee = null;   // id ou null (= création)
+  let minuteurAutosave = null;
+  let retourGestion = false;   // rouvrir la liste en refermant l'éditeur ?
+
+  /** Ferme l'éditeur et revient à la liste des habitudes si on en venait. */
+  function fermerEditeur() {
+    fermerModales();
+    habitudeEditee = null;
+    if (retourGestion) {
+      retourGestion = false;
+      rendreGestion();
+      ouvrirModale('#modale-gestion');
+    }
+  }
+
+  function ouvrirEditeur(id) {
+    habitudeEditee = id || null;
+    retourGestion = !$('#modale-gestion').classList.contains('cachee');
+    if (retourGestion) $('#modale-gestion').classList.add('cachee');
+    const creation = !id;
+    const h = creation
+      ? lireBrouillon()
+      : etat.habitudes.find((x) => x.id === id);
+
+    if (!h) return;
+
+    $('#titre-habitude').textContent = creation ? 'Nouvelle habitude' : 'Modifier';
+    $('#ch-nom').value = h.nom || '';
+    $('#ch-emoji').value = h.emoji || '';
+    $('#ch-cible').value = h.cible != null ? h.cible : 1;
+    $('#ch-unite').value = h.unite || '';
+    $('#ch-pas').value = h.pas != null ? h.pas : 1;
+    majTypeUI(h.type || 'bool');
+
+    $('#btn-creer').classList.toggle('cachee', !creation);
+    $('#btn-supprimer').classList.toggle('cachee', creation);
+    majPill(creation ? 'neutre' : 'ajour');
+
+    ouvrirModale('#modale-habitude');
+  }
+
+  function majTypeUI(type) {
+    $$('#ch-type .choix-btn').forEach((b) => b.classList.toggle('actif', b.dataset.type === type));
+    $('#bloc-quant').classList.toggle('cachee', type !== 'quant');
+  }
+
+  function typeChoisi() {
+    const actif = $('#ch-type .choix-btn.actif');
+    return actif ? actif.dataset.type : 'bool';
+  }
+
+  function lireFormulaire() {
+    const type = typeChoisi();
+    const cible = parseFloat(String($('#ch-cible').value).replace(',', '.'));
+    const pas = parseFloat(String($('#ch-pas').value).replace(',', '.'));
+    return {
+      nom: $('#ch-nom').value.trim(),
+      emoji: $('#ch-emoji').value.trim(),
+      type: type,
+      cible: type === 'quant' ? (isFinite(cible) && cible > 0 ? cible : 1) : undefined,
+      unite: type === 'quant' ? $('#ch-unite').value.trim() : undefined,
+      pas: type === 'quant' ? (isFinite(pas) && pas > 0 ? pas : 1) : undefined
+    };
+  }
+
+  function majPill(mode) {
+    const p = $('#pill-statut');
+    p.className = 'pill';
+    if (mode === 'modifie') { p.classList.add('modifie'); p.textContent = '• Modifié'; }
+    else if (mode === 'encours') { p.textContent = '⟳ Enregistrement…'; }
+    else if (mode === 'enregistre') { p.classList.add('enregistre'); p.textContent = '✓ Enregistré'; }
+    else if (mode === 'erreur') { p.classList.add('erreur'); p.textContent = '⚠ Non enregistré'; }
+    else if (mode === 'neutre') { p.textContent = 'Brouillon'; }
+    else { p.textContent = '✓ À jour'; }
+  }
+
+  /** Auto-enregistrement débauncé : aucun bouton « Enregistrer » en édition. */
+  function planifierAutosave() {
+    if (!habitudeEditee) {                       // création → brouillon local seulement
+      ecrireBrouillon(lireFormulaire());
+      majPill('neutre');
+      return;
+    }
+    majPill('modifie');
+    clearTimeout(minuteurAutosave);
+    minuteurAutosave = setTimeout(appliquerAutosave, 500);
+  }
+
+  function appliquerAutosave() {
+    if (!habitudeEditee) return;
+    const donnees = lireFormulaire();
+    const champNom = $('#ch-nom');
+    if (!donnees.nom) {
+      champNom.classList.add('erreur');
+      majPill('erreur');
+      return;
+    }
+    champNom.classList.remove('erreur');
+    majPill('encours');
+
+    const h = etat.habitudes.find((x) => x.id === habitudeEditee);
+    if (!h) return;
+    h.nom = donnees.nom;
+    h.emoji = donnees.emoji;
+    h.type = donnees.type;
+    if (donnees.type === 'quant') {
+      h.cible = donnees.cible;
+      h.unite = donnees.unite;
+      h.pas = donnees.pas;
+    } else {
+      delete h.cible; delete h.unite; delete h.pas;
+    }
+
+    if (sauver()) {
+      majPill('enregistre');
+      setTimeout(() => { if ($('#pill-statut').textContent === '✓ Enregistré') majPill('ajour'); }, 1500);
+    } else {
+      majPill('erreur');
+    }
+    rendreGestion();
+    rendreJour();
+  }
+
+  function creerHabitude() {
+    const donnees = lireFormulaire();
+    if (!donnees.nom) {
+      $('#ch-nom').classList.add('erreur');
+      toast('Donne un nom à ton habitude', 'erreur');
+      return;
+    }
+    const h = Object.assign({ id: nouvelId(), archivee: false }, donnees);
+    Object.keys(h).forEach((k) => { if (h[k] === undefined) delete h[k]; });
+    etat.habitudes.push(h);
+    sauver();
+    localStorage.removeItem(CLE_BROUILLON);
+    fermerEditeur();
+    rendreJour();
+    toast('Habitude ajoutée', 'succes');
+  }
+
+  function demanderSuppression() {
+    const h = etat.habitudes.find((x) => x.id === habitudeEditee);
+    if (!h) return;
+    const actions = [];
+    if (h.archivee) {
+      actions.push({
+        libelle: 'Réactiver', classe: 'btn-primaire', action: () => {
+          h.archivee = false; sauver(); fermerEditeur(); rendreJour();
+          toast('Habitude réactivée', 'succes');
+        }
+      });
+    } else {
+      actions.push({
+        libelle: "Archiver (garde l'historique)", classe: 'btn-primaire', action: () => {
+          h.archivee = true; sauver(); fermerEditeur(); rendreJour();
+          toast('Habitude archivée', 'succes');
+        }
+      });
+    }
+    actions.push({
+      libelle: 'Supprimer définitivement', classe: 'btn-danger', action: () => {
+        etat.habitudes = etat.habitudes.filter((x) => x.id !== h.id);
+        Object.keys(etat.jours).forEach((cle) => {
+          if (etat.jours[cle][h.id] !== undefined) {
+            delete etat.jours[cle][h.id];
+            if (!Object.keys(etat.jours[cle]).length) delete etat.jours[cle];
+          }
+        });
+        sauver(); fermerEditeur(); rendreJour();
+        toast('Habitude supprimée', 'succes');
+      }
+    });
+    confirmer('« ' + h.nom + " » : archiver la conserve dans l'historique, supprimer efface aussi toutes ses données passées.",
+      actions, '#modale-habitude');
+  }
+
+  function lireBrouillon() {
+    try {
+      const brut = localStorage.getItem(CLE_BROUILLON);
+      if (brut) return JSON.parse(brut);
+    } catch (e) { /* brouillon illisible : on repart à neuf */ }
+    return { nom: '', emoji: '', type: 'bool', cible: 1, unite: '', pas: 1 };
+  }
+  function ecrireBrouillon(donnees) {
+    try { localStorage.setItem(CLE_BROUILLON, JSON.stringify(donnees)); } catch (e) { /* ignoré */ }
+  }
+
+  /* ─────────────── Réglages / sauvegardes ─────────────── */
+
+  function ouvrirReglages() {
+    $('#ch-objectif').value = etat.reglages.objectif;
+    $('#out-objectif').textContent = etat.reglages.objectif + ' %';
+    const cles = Object.keys(etat.jours).sort();
+    $('#info-stockage').textContent = cles.length
+      ? cles.length + ' jour(s) enregistré(s), depuis le ' + dateDe(cles[0]).toLocaleDateString('fr-FR') + '.'
+      : 'Aucune donnée enregistrée pour le moment.';
+    ouvrirModale('#modale-reglages');
+  }
+
+  function exporter() {
+    const contenu = JSON.stringify(etat, null, 2);
+    const blob = new Blob([contenu], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'daily-quest-' + cleDe(aujourdHui()) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('Sauvegarde exportée', 'succes');
+  }
+
+  function importer(fichier) {
+    const lecteur = new FileReader();
+    lecteur.onload = () => {
+      try {
+        const donnees = JSON.parse(String(lecteur.result));
+        if (!donnees || !Array.isArray(donnees.habitudes)) throw new Error('format');
+        confirmer('Remplacer toutes les données actuelles par cette sauvegarde ?', [{
+          libelle: 'Importer', classe: 'btn-primaire', action: () => {
+            etat = donnees;
+            etat.jours = etat.jours || {};
+            etat.reglages = Object.assign({ objectif: 80 }, etat.reglages);
+            sauver();
+            rendreJour();
+            rendreGestion();
+            toast('Sauvegarde importée', 'succes');
+          }
+        }], '#modale-reglages');
+      } catch (e) {
+        toast('Fichier illisible', 'erreur');
+      }
+    };
+    lecteur.readAsText(fichier);
+  }
+
+  function reinitialiser() {
+    confirmer('Effacer définitivement toutes les habitudes et tout l\'historique ?', [{
+      libelle: 'Tout effacer', classe: 'btn-danger', action: () => {
+        etat = etatParDefaut();
+        localStorage.removeItem(CLE_BROUILLON);
+        sauver();
+        jourCourant = aujourdHui();
+        rendreJour();
+        rendreGestion();
+        toast('Application réinitialisée', 'succes');
+      }
+    }], '#modale-reglages');
+  }
+
+  /* ─────────────── Branchements ─────────────── */
+
+  function brancher() {
+    // Onglets
+    $$('.onglet').forEach((o) => o.addEventListener('click', () => basculerVue(o.dataset.vue)));
+
+    // Navigation jour
+    $('#jour-prec').addEventListener('click', () => {
+      jourCourant = ajouterJours(jourCourant, -1);
+      rendreJour();
+    });
+    $('#jour-suiv').addEventListener('click', () => {
+      if (memeJour(jourCourant, aujourdHui())) return;
+      jourCourant = ajouterJours(jourCourant, 1);
+      rendreJour();
+    });
+
+    // Habitudes du jour
+    $('#liste-habitudes').addEventListener('click', surClicHabitude);
+
+    // Historique
+    $$('.segment').forEach((s) => s.addEventListener('click', () => {
+      modeHistorique = s.dataset.mode;
+      ancreHistorique = aujourdHui();
+      $$('.segment').forEach((x) => x.classList.toggle('actif', x === s));
+      rendreHistorique();
+    }));
+    $('#periode-prec').addEventListener('click', () => decalerPeriode(-1));
+    $('#periode-suiv').addEventListener('click', () => decalerPeriode(1));
+
+    // Gestion
+    $('#btn-gerer').addEventListener('click', () => { rendreGestion(); ouvrirModale('#modale-gestion'); });
+    $('#btn-ajouter').addEventListener('click', () => ouvrirEditeur(null));
+    $('#btn-creer').addEventListener('click', creerHabitude);
+    $('#btn-supprimer').addEventListener('click', demanderSuppression);
+
+    // Éditeur : auto-enregistrement
+    ['#ch-nom', '#ch-emoji', '#ch-cible', '#ch-unite', '#ch-pas'].forEach((sel) => {
+      $(sel).addEventListener('input', planifierAutosave);
+    });
+    $$('#ch-type .choix-btn').forEach((b) => b.addEventListener('click', () => {
+      majTypeUI(b.dataset.type);
+      planifierAutosave();
+    }));
+
+    // Quantité
+    $('#btn-valider-quantite').addEventListener('click', validerSaisieQuantite);
+    $('#ch-quantite').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') validerSaisieQuantite();
+    });
+
+    // Réglages
+    $('#btn-reglages').addEventListener('click', ouvrirReglages);
+    $('#ch-objectif').addEventListener('input', (e) => {
+      etat.reglages.objectif = Number(e.target.value);
+      $('#out-objectif').textContent = etat.reglages.objectif + ' %';
+      sauver();
+      rendreJour();
+    });
+    $('#btn-export').addEventListener('click', exporter);
+    $('#btn-import').addEventListener('click', () => $('#fichier-import').click());
+    $('#fichier-import').addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) importer(e.target.files[0]);
+      e.target.value = '';
+    });
+    $('#btn-reinit').addEventListener('click', reinitialiser);
+
+    // Fermeture des modales : on vide d'abord l'auto-enregistrement en attente.
+    $$('[data-fermer]').forEach((b) => b.addEventListener('click', fermerAvecFlush));
+    $('#voile').addEventListener('click', fermerAvecFlush);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') fermerAvecFlush();
+    });
+  }
+
+  function fermerAvecFlush() {
+    if (habitudeEditee && minuteurAutosave) {
+      clearTimeout(minuteurAutosave);
+      minuteurAutosave = null;
+      appliquerAutosave();   // rien ne se perd à la fermeture
+    }
+    fermerEditeur();
+  }
+
+  /* ─────────────── Démarrage ─────────────── */
+
+  function demarrer() {
+    etat = charger();
+    sauver();
+    brancher();
+    rendreJour();
+
+    // Si l'app reste ouverte au passage de minuit, on recale la date.
+    setInterval(() => {
+      if ($('#vue-jour').classList.contains('cachee')) return;
+      if ($('#jour-suiv').disabled && !memeJour(jourCourant, aujourdHui())) {
+        jourCourant = aujourdHui();
+        rendreJour();
+      }
+    }, 60000);
+
+    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* hors-ligne indisponible */ });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', demarrer);
+})();
+
+</script>
+</body>
+</html>
