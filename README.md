@@ -25,8 +25,9 @@ hors-ligne.
     chiffre exact ; un filet en bas de ligne montre la progression partielle.
 - Les lignes sont **compactées automatiquement** pour que toutes les habitudes tiennent
   à l'écran sans défilement (voir `ajusterDensite`), jusqu'à un plancher de 34 px.
-- **Gérer mes habitudes** se trouve dans les réglages ⚙ : ajouter, renommer, réordonner,
-  archiver ou supprimer. L'éditeur enregistre en continu ; le bouton vert **Terminé** ne
+- **Gérer mes habitudes** se trouve dans les réglages ⚙ : ajouter, renommer, archiver
+  ou supprimer. L'ordre se change en **maintenant la poignée `≡`** et en faisant glisser
+  la ligne ; la liste défile toute seule quand on approche du bord. L'éditeur enregistre en continu ; le bouton vert **Terminé** ne
   fait que refermer la fenêtre.
 
 ### 2. Historique
@@ -98,12 +99,14 @@ téléphone.
 
 Dans **Réglages ⚙** :
 
-- **Gérer mes habitudes** → ajout, renommage, ordre, archivage, suppression ;
+- **Gérer mes habitudes** → ajout, renommage, ordre (glisser-déposer), archivage, suppression ;
 - **Apparence** → `Auto` (suit le réglage du téléphone), `Clair` ou `Sombre` ;
 - **Objectif** → pourcentage requis pour qu'une journée compte dans la série 🔥 ;
 - **Exporter une sauvegarde** → fichier `daily-quest-AAAA-MM-JJ.json` ;
 - **Importer une sauvegarde** → restaure l'ensemble (habitudes + historique) ;
-- **Tout réinitialiser** → repart des 12 points par défaut.
+- **Tout réinitialiser** → efface l'historique complet, les habitudes personnalisées
+  (retour aux 12 points d'origine), l'objectif et le thème. Sans effet sur les fichiers
+  déjà exportés. Irréversible.
 
 Le même export permet de passer d'un appareil à l'autre.
 

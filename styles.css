@@ -743,20 +743,32 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 
 .gestion-nom { flex: 1; min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gestion-nom small { display: block; font-size: 11px; color: var(--texte-faible); }
-.btn-mini {
-  width: 40px;
-  height: 40px;
+/* Poignée de déplacement. touch-action:none est indispensable : sans elle,
+   le navigateur interprète le glissement comme un défilement de la page. */
+.gestion-poignee {
+  width: 44px;
+  height: 44px;
   flex: none;
   border-radius: 10px;
   background: var(--surface-2);
   border: 1px solid var(--bordure);
-  color: var(--texte-doux);
-  font-size: 14px;
+  color: var(--texte-faible);
+  font-size: 17px;
   display: grid;
   place-items: center;
+  touch-action: none;
+  cursor: grab;
 }
-.btn-mini:active:not(:disabled) { background: var(--bordure); }
-.btn-mini:disabled { opacity: 0.3; }
+.gestion-poignee:active { cursor: grabbing; background: var(--bordure); color: var(--texte-doux); }
+
+.gestion-item { position: relative; transition: transform 0.16s ease; }
+.gestion-item.en-deplacement {
+  transition: none;
+  z-index: 5;
+  border-color: var(--or);
+  box-shadow: var(--ombre);
+}
+.gestion-item.en-deplacement .gestion-poignee { background: var(--or-doux); color: var(--or-texte); }
 
 /* Toast */
 .toast {

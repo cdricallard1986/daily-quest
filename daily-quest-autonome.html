@@ -757,20 +757,32 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 
 .gestion-nom { flex: 1; min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gestion-nom small { display: block; font-size: 11px; color: var(--texte-faible); }
-.btn-mini {
-  width: 40px;
-  height: 40px;
+/* Poignée de déplacement. touch-action:none est indispensable : sans elle,
+   le navigateur interprète le glissement comme un défilement de la page. */
+.gestion-poignee {
+  width: 44px;
+  height: 44px;
   flex: none;
   border-radius: 10px;
   background: var(--surface-2);
   border: 1px solid var(--bordure);
-  color: var(--texte-doux);
-  font-size: 14px;
+  color: var(--texte-faible);
+  font-size: 17px;
   display: grid;
   place-items: center;
+  touch-action: none;
+  cursor: grab;
 }
-.btn-mini:active:not(:disabled) { background: var(--bordure); }
-.btn-mini:disabled { opacity: 0.3; }
+.gestion-poignee:active { cursor: grabbing; background: var(--bordure); color: var(--texte-doux); }
+
+.gestion-item { position: relative; transition: transform 0.16s ease; }
+.gestion-item.en-deplacement {
+  transition: none;
+  z-index: 5;
+  border-color: var(--or);
+  box-shadow: var(--ombre);
+}
+.gestion-item.en-deplacement .gestion-poignee { background: var(--or-doux); color: var(--or-texte); }
 
 /* Toast */
 .toast {
@@ -1053,7 +1065,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.08.17-5';
+  const VERSION = '2026.08.17-6';
 
   const CLE_STOCKAGE = 'dq.v1';
   const CLE_BROUILLON = 'dq.brouillon';
@@ -2109,37 +2121,126 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
       cible.addEventListener('click', () => ouvrirEditeur(h.id));
       li.appendChild(cible);
 
-      const haut = boutonMini('↑', 'Monter', index === 0, () => deplacer(index, -1));
-      const bas = boutonMini('↓', 'Descendre', index === etat.habitudes.length - 1, () => deplacer(index, 1));
-      li.appendChild(haut);
-      li.appendChild(bas);
+      // Poignée de déplacement : on la maintient et on fait glisser la ligne.
+      const poignee = document.createElement('button');
+      poignee.type = 'button';
+      poignee.className = 'gestion-poignee';
+      poignee.setAttribute('aria-label', 'Déplacer ' + h.nom);
+      poignee.textContent = '≡';
+      poignee.addEventListener('pointerdown', (evt) => demarrerGlisse(evt, index, li, poignee));
+      poignee.addEventListener('pointermove', surGlisse);
+      poignee.addEventListener('pointerup', finGlisse);
+      poignee.addEventListener('pointercancel', finGlisse);
+      // Les flèches du clavier restent utilisables (accessibilité, bureau).
+      poignee.addEventListener('keydown', (evt) => {
+        if (evt.key !== 'ArrowUp' && evt.key !== 'ArrowDown') return;
+        evt.preventDefault();
+        deplacer(index, index + (evt.key === 'ArrowUp' ? -1 : 1));
+      });
+      li.appendChild(poignee);
 
       liste.appendChild(li);
     });
   }
 
-  function boutonMini(texte, libelle, desactive, action) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'btn-mini';
-    b.textContent = texte;
-    b.setAttribute('aria-label', libelle);
-    b.disabled = desactive;
-    b.addEventListener('click', action);
-    return b;
-  }
-
-  function deplacer(index, sens) {
-    const cible = index + sens;
-    if (cible < 0 || cible >= etat.habitudes.length) return;
+  function deplacer(index, cible) {
+    if (cible === index || cible < 0 || cible >= etat.habitudes.length) return;
     const copie = etat.habitudes.slice();
-    const tmp = copie[index];
-    copie[index] = copie[cible];
-    copie[cible] = tmp;
+    const [deplacee] = copie.splice(index, 1);
+    copie.splice(cible, 0, deplacee);
     etat.habitudes = copie;
     sauver();
     rendreGestion();
     rendreJour();
+  }
+
+  /* ─────────────── Réordonnancement par glisser ─────────────── */
+
+  const ECART_GESTION = 10;   // doit correspondre au gap de .liste-gestion
+  let glisse = null;
+
+  function borne(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function demarrerGlisse(evt, index, li, poignee) {
+    evt.preventDefault();
+    const items = Array.prototype.slice.call($('#liste-gestion').children);
+    poignee.setPointerCapture(evt.pointerId);
+    glisse = {
+      index: index,
+      cible: index,
+      li: li,
+      items: items,
+      pas: li.getBoundingClientRect().height + ECART_GESTION,
+      departY: evt.clientY,
+      dernierY: evt.clientY,
+      corps: li.closest('.modale-corps')
+    };
+    li.classList.add('en-deplacement');
+    requestAnimationFrame(boucleDefilement);
+  }
+
+  function surGlisse(evt) {
+    if (!glisse) return;
+    glisse.dernierY = evt.clientY;
+    positionner();
+  }
+
+  function positionner() {
+    const dy = glisse.dernierY - glisse.departY;
+    glisse.li.style.transform = 'translateY(' + dy + 'px)';
+
+    const cible = borne(glisse.index + Math.round(dy / glisse.pas), 0, glisse.items.length - 1);
+    if (cible === glisse.cible) return;
+    glisse.cible = cible;
+
+    // Les autres lignes s'écartent pour montrer où la ligne va se poser.
+    glisse.items.forEach((item, i) => {
+      if (i === glisse.index) return;
+      let decalage = 0;
+      if (cible > glisse.index && i > glisse.index && i <= cible) decalage = -glisse.pas;
+      else if (cible < glisse.index && i >= cible && i < glisse.index) decalage = glisse.pas;
+      item.style.transform = decalage ? 'translateY(' + decalage + 'px)' : '';
+    });
+  }
+
+  /** Fait défiler la liste quand on approche du haut ou du bas pendant un glisser. */
+  function boucleDefilement() {
+    if (!glisse) return;
+    const corps = glisse.corps;
+    if (corps) {
+      const zone = corps.getBoundingClientRect();
+      const marge = 60;
+      let vitesse = 0;
+      if (glisse.dernierY < zone.top + marge) vitesse = -9;
+      else if (glisse.dernierY > zone.bottom - marge) vitesse = 9;
+      if (vitesse) {
+        const avant = corps.scrollTop;
+        corps.scrollTop += vitesse;
+        const reel = corps.scrollTop - avant;
+        if (reel) {
+          // La ligne défile avec le contenu : on compense pour qu'elle
+          // reste sous le doigt.
+          glisse.departY -= reel;
+          positionner();
+        }
+      }
+    }
+    requestAnimationFrame(boucleDefilement);
+  }
+
+  function finGlisse() {
+    if (!glisse) return;
+    const depart = glisse.index;
+    const arrivee = glisse.cible;
+    glisse.items.forEach((item) => {
+      item.style.transform = '';
+      item.classList.remove('en-deplacement');
+    });
+    glisse = null;
+    if (arrivee !== depart) deplacer(depart, arrivee);
+    else rendreGestion();
   }
 
   /* ─────────────── Éditeur d'habitude ─────────────── */
@@ -2414,7 +2515,12 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   }
 
   function reinitialiser() {
-    confirmer('Effacer définitivement toutes les habitudes et tout l\'historique ?', [{
+    const nb = Object.keys(etat.jours).length;
+    const message = 'Cela efface : ton historique complet (' + nb + ' jour(s) enregistré(s), ' +
+      'donc série, record et niveau), tes habitudes personnalisées — retour aux 12 points ' +
+      "d'origine — ainsi que l'objectif et le thème. Les sauvegardes déjà exportées ne sont " +
+      'pas touchées. Action irréversible.';
+    confirmer(message, [{
       libelle: 'Tout effacer', classe: 'btn-danger', action: () => {
         etat = etatParDefaut();
         localStorage.removeItem(CLE_BROUILLON);
