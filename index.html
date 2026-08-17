@@ -27,26 +27,21 @@
 </head>
 <body>
 
+<!-- En-tête = navigation : la même barre sert la journée et l'historique,
+     ce qui économise la hauteur d'un bandeau de titre. -->
 <header class="entete">
-  <div class="entete-titre">
-    <span class="logo" aria-hidden="true">◆</span>
-    <h1>Daily Quest</h1>
+  <button class="btn-nav" id="nav-prec" type="button" aria-label="Précédent">‹</button>
+  <div class="nav-label">
+    <span id="nav-titre">—</span>
+    <small id="nav-sous-titre"></small>
   </div>
+  <button class="btn-nav" id="nav-suiv" type="button" aria-label="Suivant">›</button>
   <button class="btn-icone" id="btn-reglages" type="button" aria-label="Réglages">⚙</button>
 </header>
 
 <main>
   <!-- ══════════ ONGLET AUJOURD'HUI ══════════ -->
   <section class="vue" id="vue-jour" aria-label="Journée">
-
-    <div class="nav-periode">
-      <button class="btn-nav" id="jour-prec" type="button" aria-label="Jour précédent">‹</button>
-      <div class="nav-label">
-        <span id="jour-titre">—</span>
-        <small id="jour-sous-titre"></small>
-      </div>
-      <button class="btn-nav" id="jour-suiv" type="button" aria-label="Jour suivant">›</button>
-    </div>
 
     <div class="carte carte-score">
       <div class="anneau">
@@ -80,10 +75,6 @@
     </div>
 
     <ul class="liste-habitudes" id="liste-habitudes"></ul>
-
-    <button class="btn-secondaire pleine-largeur" id="btn-gerer" type="button">
-      Gérer mes habitudes
-    </button>
   </section>
 
   <!-- ══════════ ONGLET HISTORIQUE ══════════ -->
@@ -93,15 +84,6 @@
       <button class="segment actif" data-mode="semaine" role="tab" type="button">Semaine</button>
       <button class="segment" data-mode="mois" role="tab" type="button">Mois</button>
       <button class="segment" data-mode="annee" role="tab" type="button">Année</button>
-    </div>
-
-    <div class="nav-periode">
-      <button class="btn-nav" id="periode-prec" type="button" aria-label="Période précédente">‹</button>
-      <div class="nav-label">
-        <span id="periode-titre">—</span>
-        <small id="periode-sous-titre"></small>
-      </div>
-      <button class="btn-nav" id="periode-suiv" type="button" aria-label="Période suivante">›</button>
     </div>
 
     <div class="carte resume">
@@ -201,7 +183,10 @@
 
     <div class="actions-modale">
       <button class="btn-primaire pleine-largeur cachee" id="btn-creer" type="button">Créer l'habitude</button>
-      <button class="btn-danger pleine-largeur cachee" id="btn-supprimer" type="button">Supprimer / archiver</button>
+      <div class="duo cachee" id="actions-edition">
+        <button class="btn-succes" id="btn-termine" type="button">✓ Terminé</button>
+        <button class="btn-danger" id="btn-supprimer" type="button">Supprimer / archiver</button>
+      </div>
     </div>
   </div>
 </div>
@@ -213,6 +198,8 @@
     <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
   </div>
   <div class="modale-corps">
+    <button class="btn-primaire pleine-largeur" id="btn-gerer" type="button">Gérer mes habitudes</button>
+
     <div class="champ">
       <span>Apparence</span>
       <div class="choix trois" id="ch-theme">

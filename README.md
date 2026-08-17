@@ -13,17 +13,21 @@ hors-ligne.
 
 ### 1. Aujourd'hui
 
-- La journée en cours, avec navigation vers les jours précédents (`‹` / `›`) pour rattraper
-  un oubli. Impossible d'aller au-delà d'aujourd'hui.
+- La journée en cours ; les flèches `‹` / `›` de l'en-tête servent les deux onglets
+  (jour ici, période dans l'historique). Impossible d'aller au-delà d'aujourd'hui.
 - Un anneau de progression (`8 / 12`, `67 %`) et trois indicateurs de jeu :
   **série** (🔥 jours consécutifs au-dessus de l'objectif), **record** (meilleure série
   historique) et **niveau** (1 XP par point validé, un niveau tous les 50 XP).
 - Deux types de points :
   - **à cocher** — une pastille, on tape dessus (ex. « Pas d'alcool ») ;
   - **quantité** — un compteur `− / +` avec un objectif chiffré (ex. `10 000 pas`,
-    `3 L`, `30 min`). Le point est validé dès que l'objectif est atteint, et une jauge
-    montre la progression partielle. Un appui sur la valeur permet de saisir un chiffre exact.
-- **Gérer mes habitudes** : ajouter, renommer, réordonner, archiver ou supprimer.
+    `3 L`, `30 min`) affiché en `2,5/3 L`. Un appui sur la valeur permet de saisir un
+    chiffre exact ; un filet en bas de ligne montre la progression partielle.
+- Les lignes sont **compactées automatiquement** pour que toutes les habitudes tiennent
+  à l'écran sans défilement (voir `ajusterDensite`), jusqu'à un plancher de 34 px.
+- **Gérer mes habitudes** se trouve dans les réglages ⚙ : ajouter, renommer, réordonner,
+  archiver ou supprimer. L'éditeur enregistre en continu ; le bouton vert **Terminé** ne
+  fait que refermer la fenêtre.
 
 ### 2. Historique
 
@@ -94,6 +98,7 @@ téléphone.
 
 Dans **Réglages ⚙** :
 
+- **Gérer mes habitudes** → ajout, renommage, ordre, archivage, suppression ;
 - **Apparence** → `Auto` (suit le réglage du téléphone), `Clair` ou `Sombre` ;
 - **Objectif** → pourcentage requis pour qu'une journée compte dans la série 🔥 ;
 - **Exporter une sauvegarde** → fichier `daily-quest-AAAA-MM-JJ.json` ;

@@ -10,7 +10,7 @@
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.08.17-4';
+  const VERSION = '2026.08.17-5';
 
   const CLE_STOCKAGE = 'dq.v1';
   const CLE_BROUILLON = 'dq.brouillon';
@@ -332,6 +332,7 @@
   const $$ = (sel) => Array.prototype.slice.call(document.querySelectorAll(sel));
 
   let jourCourant = aujourdHui();
+  let suivaitAujourdHui = true;   // l'écran affiche-t-il la journée en cours ?
   let modeHistorique = 'semaine';
   let ancreHistorique = aujourdHui();
 
@@ -344,13 +345,14 @@
     const score = scoreJour(cle, habs);
 
     // En-tête de date
-    $('#jour-titre').textContent = fmtDateLongue(jourCourant);
+    $('#nav-titre').textContent = fmtDateLongue(jourCourant);
     const estAujourdHui = memeJour(jourCourant, aujourdHui());
     const hier = memeJour(jourCourant, ajouterJours(aujourdHui(), -1));
-    $('#jour-sous-titre').textContent = estAujourdHui
+    $('#nav-sous-titre').textContent = estAujourdHui
       ? "Aujourd'hui · " + jourCourant.getFullYear()
       : hier ? 'Hier · ' + jourCourant.getFullYear() : String(jourCourant.getFullYear());
-    $('#jour-suiv').disabled = estAujourdHui;
+    $('#nav-suiv').disabled = estAujourdHui;
+    suivaitAujourdHui = estAujourdHui;
 
     // Anneau de progression
     const circonference = 2 * Math.PI * 52;
@@ -393,27 +395,13 @@
       emoji.textContent = h.emoji || '•';
       li.appendChild(emoji);
 
-      const infos = document.createElement('div');
-      infos.className = 'hab-infos';
+      // Une seule ligne par habitude : l'objectif est intégré à la valeur
+      // (« 2,5/3 L ») et la progression passe en filet sous la carte, pour
+      // que les douze points tiennent sans défilement.
       const nom = document.createElement('div');
       nom.className = 'hab-nom';
       nom.textContent = h.nom;
-      infos.appendChild(nom);
-
-      if (h.type === 'quant') {
-        const detail = document.createElement('div');
-        detail.className = 'hab-detail';
-        detail.textContent = 'Objectif ' + fmt(h.cible) + ' ' + (h.unite || '');
-        infos.appendChild(detail);
-
-        const jaugeH = document.createElement('div');
-        jaugeH.className = 'hab-jauge';
-        const barre = document.createElement('i');
-        barre.style.width = (progression(h, valeurs) * 100) + '%';
-        jaugeH.appendChild(barre);
-        infos.appendChild(jaugeH);
-      }
-      li.appendChild(infos);
+      li.appendChild(nom);
 
       if (h.type === 'quant') {
         const zone = document.createElement('div');
@@ -430,7 +418,8 @@
         val.className = 'hab-valeur';
         val.type = 'button';
         val.dataset.action = 'saisir';
-        val.textContent = fmt(valeurBrute(h, valeurs)) + (h.unite ? ' ' + h.unite : '');
+        val.textContent = fmt(valeurBrute(h, valeurs)) + '/' + fmt(h.cible) +
+          (h.unite ? ' ' + h.unite : '');
 
         const plus = document.createElement('button');
         plus.className = 'btn-pas';
@@ -443,6 +432,11 @@
         zone.appendChild(val);
         zone.appendChild(plus);
         li.appendChild(zone);
+
+        const filet = document.createElement('i');
+        filet.className = 'hab-filet';
+        filet.style.width = (progression(h, valeurs) * 100) + '%';
+        li.appendChild(filet);
       } else {
         const coche = document.createElement('button');
         coche.className = 'hab-coche';
@@ -456,6 +450,28 @@
 
       liste.appendChild(li);
     });
+
+    ajusterDensite();
+  }
+
+  /**
+   * Règle la hauteur des lignes pour que toutes les habitudes tiennent
+   * sans défilement. Sous un certain seuil on arrête de comprimer : mieux
+   * vaut défiler que de rendre les lignes illisibles.
+   */
+  function ajusterDensite() {
+    const liste = $('#liste-habitudes');
+    const nb = liste.children.length;
+    if (!nb) return;
+
+    const ECART = 6;
+    const haut = liste.getBoundingClientRect().top;
+    const onglets = document.querySelector('.onglets').getBoundingClientRect().height;
+    const dispo = window.innerHeight - haut - onglets - 10;
+    const brut = Math.floor((dispo - ECART * (nb - 1)) / nb);
+    const hauteur = Math.max(34, Math.min(58, brut));
+
+    document.documentElement.style.setProperty('--h-ligne', hauteur + 'px');
   }
 
   function surClicHabitude(evt) {
@@ -567,17 +583,17 @@
       const debut = debutSemaine(ancreHistorique);
       const fin = ajouterJours(debut, 6);
       const memeMois = debut.getMonth() === fin.getMonth();
-      $('#periode-titre').textContent = debut.getDate() + (memeMois ? '' : ' ' + MOIS_COURTS[debut.getMonth()]) +
+      $('#nav-titre').textContent = debut.getDate() + (memeMois ? '' : ' ' + MOIS_COURTS[debut.getMonth()]) +
         ' – ' + fin.getDate() + ' ' + MOIS_NOMS[fin.getMonth()];
-      $('#periode-sous-titre').textContent = 'Semaine ' + numeroSemaine(debut) + ' · ' + fin.getFullYear();
+      $('#nav-sous-titre').textContent = 'Semaine ' + numeroSemaine(debut) + ' · ' + fin.getFullYear();
     } else if (modeHistorique === 'mois') {
-      $('#periode-titre').textContent = majuscule(MOIS_NOMS[ancreHistorique.getMonth()]) + ' ' + ancreHistorique.getFullYear();
-      $('#periode-sous-titre').textContent = cles.length + ' jours';
+      $('#nav-titre').textContent = majuscule(MOIS_NOMS[ancreHistorique.getMonth()]) + ' ' + ancreHistorique.getFullYear();
+      $('#nav-sous-titre').textContent = cles.length + ' jours';
     } else {
-      $('#periode-titre').textContent = String(ancreHistorique.getFullYear());
-      $('#periode-sous-titre').textContent = cles.length + ' jours';
+      $('#nav-titre').textContent = String(ancreHistorique.getFullYear());
+      $('#nav-sous-titre').textContent = cles.length + ' jours';
     }
-    $('#periode-suiv').disabled = periodeEstCourante();
+    $('#nav-suiv').disabled = periodeEstCourante();
 
     // Résumé
     $('#res-moyenne').textContent = Math.round(donnees.moyenne * 100) + '%';
@@ -925,12 +941,36 @@
 
   /* ─────────────── Navigation entre onglets ─────────────── */
 
+  let vueActive = 'jour';
+
   function basculerVue(nom) {
+    vueActive = nom;
     $$('.onglet').forEach((o) => o.classList.toggle('actif', o.dataset.vue === nom));
     $('#vue-jour').classList.toggle('cachee', nom !== 'jour');
     $('#vue-historique').classList.toggle('cachee', nom !== 'historique');
     window.scrollTo(0, 0);
     if (nom === 'historique') rendreHistorique();
+    else rendreJour();
+  }
+
+  /** Les flèches de l'en-tête pilotent la vue affichée. */
+  function reculer() {
+    if (vueActive === 'jour') {
+      jourCourant = ajouterJours(jourCourant, -1);
+      rendreJour();
+    } else {
+      decalerPeriode(-1);
+    }
+  }
+
+  function avancer() {
+    if (vueActive === 'jour') {
+      if (memeJour(jourCourant, aujourdHui())) return;
+      jourCourant = ajouterJours(jourCourant, 1);
+      rendreJour();
+    } else {
+      decalerPeriode(1);
+    }
   }
 
   /* ─────────────── Modales ─────────────── */
@@ -1112,7 +1152,7 @@
     majTypeUI(h.type || 'bool');
 
     $('#btn-creer').classList.toggle('cachee', !creation);
-    $('#btn-supprimer').classList.toggle('cachee', creation);
+    $('#actions-edition').classList.toggle('cachee', creation);
     majPill(creation ? 'neutre' : 'ajour');
 
     ouvrirModale('#modale-habitude');
@@ -1351,19 +1391,16 @@
     // Onglets
     $$('.onglet').forEach((o) => o.addEventListener('click', () => basculerVue(o.dataset.vue)));
 
-    // Navigation jour
-    $('#jour-prec').addEventListener('click', () => {
-      jourCourant = ajouterJours(jourCourant, -1);
-      rendreJour();
-    });
-    $('#jour-suiv').addEventListener('click', () => {
-      if (memeJour(jourCourant, aujourdHui())) return;
-      jourCourant = ajouterJours(jourCourant, 1);
-      rendreJour();
-    });
+    // Navigation partagée (en-tête) : jour ou période selon l'onglet actif.
+    $('#nav-prec').addEventListener('click', reculer);
+    $('#nav-suiv').addEventListener('click', avancer);
 
     // Habitudes du jour
     $('#liste-habitudes').addEventListener('click', surClicHabitude);
+
+    // La densité dépend de la hauteur utile : à recalculer si elle change.
+    window.addEventListener('resize', () => { if (vueActive === 'jour') ajusterDensite(); });
+    window.addEventListener('orientationchange', () => setTimeout(ajusterDensite, 200));
 
     // Historique
     $$('.segment').forEach((s) => s.addEventListener('click', () => {
@@ -1372,14 +1409,18 @@
       $$('.segment').forEach((x) => x.classList.toggle('actif', x === s));
       rendreHistorique();
     }));
-    $('#periode-prec').addEventListener('click', () => decalerPeriode(-1));
-    $('#periode-suiv').addEventListener('click', () => decalerPeriode(1));
 
-    // Gestion
-    $('#btn-gerer').addEventListener('click', () => { rendreGestion(); ouvrirModale('#modale-gestion'); });
+    // Gestion (accessible depuis les réglages)
+    $('#btn-gerer').addEventListener('click', () => {
+      fermerModales();
+      rendreGestion();
+      ouvrirModale('#modale-gestion');
+    });
     $('#btn-ajouter').addEventListener('click', () => ouvrirEditeur(null));
     $('#btn-creer').addEventListener('click', creerHabitude);
     $('#btn-supprimer').addEventListener('click', demanderSuppression);
+    // Bouton vert : tout est déjà enregistré, il ne fait que refermer.
+    $('#btn-termine').addEventListener('click', fermerAvecFlush);
 
     // Éditeur : auto-enregistrement
     ['#ch-nom', '#ch-emoji', '#ch-cible', '#ch-unite', '#ch-pas'].forEach((sel) => {
@@ -1452,10 +1493,11 @@
     brancher();
     rendreJour();
 
-    // Si l'app reste ouverte au passage de minuit, on recale la date.
+    // Si l'app reste ouverte au passage de minuit, on recale la date —
+    // uniquement si l'utilisateur regardait bien la journée en cours.
     setInterval(() => {
-      if ($('#vue-jour').classList.contains('cachee')) return;
-      if ($('#jour-suiv').disabled && !memeJour(jourCourant, aujourdHui())) {
+      if (vueActive !== 'jour' || !suivaitAujourdHui) return;
+      if (!memeJour(jourCourant, aujourdHui())) {
         jourCourant = aujourdHui();
         rendreJour();
       }

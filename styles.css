@@ -135,7 +135,7 @@ html, body {
 }
 
 body {
-  padding-bottom: calc(72px + var(--bas));
+  padding-bottom: calc(64px + var(--bas));
   min-height: 100vh;
 }
 
@@ -172,14 +172,13 @@ input.erreur { border-color: var(--rouge); }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: calc(12px + var(--haut)) 16px 12px;
+  padding: calc(8px + var(--haut)) 12px 8px;
   background: var(--fond-flou);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--bordure);
 }
-.entete-titre { display: flex; align-items: center; gap: 9px; }
-.entete h1 { font-size: 18px; }
-.logo { color: var(--or-texte); font-size: 15px; }
+.entete .nav-label { flex: 1; }
+.entete .btn-nav { width: 36px; height: 36px; font-size: 19px; }
 
 .btn-icone {
   width: 38px;
@@ -194,7 +193,7 @@ input.erreur { border-color: var(--rouge); }
 }
 .btn-icone:active { background: var(--surface-2); }
 
-main { padding: 16px; max-width: 720px; margin: 0 auto; }
+main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 .vue.cachee, .cachee { display: none !important; }
 
 /* ─────────── Navigation de période ─────────── */
@@ -242,11 +241,11 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   margin-bottom: 16px;
 }
 
-.carte-score { display: flex; align-items: center; gap: 18px; }
+.carte-score { display: flex; align-items: center; gap: 14px; padding: 10px 12px; margin-bottom: 10px; }
 
-.anneau { position: relative; width: 108px; height: 108px; flex: none; }
+.anneau { position: relative; width: 72px; height: 72px; flex: none; }
 .anneau svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.anneau circle { fill: none; stroke-width: 9; stroke-linecap: round; }
+.anneau circle { fill: none; stroke-width: 11; stroke-linecap: round; }
 .anneau-fond { stroke: var(--surface-2); }
 .anneau-jauge {
   stroke: var(--or);
@@ -263,25 +262,25 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   align-items: center;
   justify-content: center;
 }
-.anneau-texte strong { font-size: 26px; letter-spacing: -0.03em; }
-.anneau-texte span { font-size: 12px; color: var(--texte-faible); }
+.anneau-texte strong { font-size: 19px; letter-spacing: -0.03em; }
+.anneau-texte span { font-size: 10px; color: var(--texte-faible); }
 
 .stats-jour {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px 4px;
+  gap: 7px 4px;
   min-width: 0;
 }
 .stat { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.stat-val { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.stat-val { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
 .stat-lib { font-size: 10.5px; color: var(--texte-faible); white-space: nowrap; }
 
 .barre-xp {
   grid-column: 1 / -1;
   position: relative;
-  height: 20px;
-  border-radius: 10px;
+  height: 17px;
+  border-radius: 9px;
   background: var(--surface-2);
   overflow: hidden;
 }
@@ -304,66 +303,69 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 }
 
 /* ─────────── Liste des habitudes ─────────── */
-.liste-habitudes { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
+.liste-habitudes { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 
+/* --h-ligne est calculée au rendu pour que toutes les habitudes tiennent
+   à l'écran sans défilement (voir ajusterDensite dans app.js). */
 .habitude {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  height: var(--h-ligne, 52px);
+  padding: 0 10px;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--bordure);
-  border-radius: var(--rayon);
-  padding: 12px 14px;
+  border-radius: 12px;
   transition: border-color 0.2s, background 0.2s;
 }
 .habitude.faite { border-color: rgba(var(--vert-rgb), 0.45); background: linear-gradient(90deg, var(--vert-doux), var(--surface) 60%); }
 
 .hab-emoji {
-  width: 40px;
-  height: 40px;
+  width: calc(var(--h-ligne, 52px) - 14px);
+  height: calc(var(--h-ligne, 52px) - 14px);
+  max-width: 34px;
+  max-height: 34px;
   flex: none;
   display: grid;
   place-items: center;
-  font-size: 20px;
-  border-radius: 12px;
+  font-size: 17px;
+  border-radius: 9px;
   background: var(--surface-2);
 }
 .habitude.faite .hab-emoji { background: var(--vert-doux); }
 
-.hab-infos { flex: 1; min-width: 0; }
-.hab-nom { font-size: 15px; font-weight: 600; line-height: 1.25; }
-.habitude.faite .hab-nom { color: var(--vert-texte); }
-.hab-detail { font-size: 12px; color: var(--texte-faible); margin-top: 2px; }
-
-.hab-jauge {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--surface-2);
-  margin-top: 6px;
+.hab-nom {
+  flex: 1;
+  min-width: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
-.hab-jauge i { display: block; height: 100%; background: var(--or); border-radius: 2px; transition: width 0.3s; }
-.habitude.faite .hab-jauge i { background: var(--vert); }
+.habitude.faite .hab-nom { color: var(--vert-texte); }
 
-.hab-coche {
+/* Filet de progression collé au bas de la ligne : informe sans coûter
+   de hauteur. */
+.hab-filet {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--or);
+  border-radius: 0 3px 0 0;
+  transition: width 0.3s;
+}
+.habitude.faite .hab-filet { background: var(--vert); }
+
+.hab-quant { display: flex; align-items: center; gap: 5px; flex: none; }
+.btn-pas {
   width: 34px;
   height: 34px;
-  flex: none;
-  border-radius: 50%;
-  border: 2px solid var(--bordure);
-  display: grid;
-  place-items: center;
-  font-size: 16px;
-  color: transparent;
-  transition: all 0.18s;
-}
-.habitude.faite .hab-coche { background: var(--vert); border-color: var(--vert-texte); color: var(--sur-vert); }
-
-.hab-quant { display: flex; align-items: center; gap: 6px; flex: none; }
-.btn-pas {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  border-radius: 9px;
   background: var(--surface-2);
   border: 1px solid var(--bordure);
   font-size: 17px;
@@ -374,18 +376,33 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 }
 .btn-pas:active { background: var(--bordure); }
 .hab-valeur {
-  min-width: 46px;
+  min-width: 58px;
   text-align: center;
   font-variant-numeric: tabular-nums;
   font-weight: 650;
-  font-size: 14px;
+  font-size: 12.5px;
   padding: 4px 2px;
   border-radius: 8px;
+  color: var(--texte-doux);
 }
 .habitude.faite .hab-valeur { color: var(--vert-texte); }
 
+.hab-coche {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--bordure);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  color: transparent;
+  transition: all 0.18s;
+}
+.habitude.faite .hab-coche { background: var(--vert); border-color: var(--vert); color: var(--sur-vert); }
+
 /* ─────────── Boutons ─────────── */
-.btn-primaire, .btn-secondaire, .btn-danger {
+.btn-primaire, .btn-secondaire, .btn-danger, .btn-succes {
   border-radius: 12px;
   padding: 13px 16px;
   font-weight: 600;
@@ -397,6 +414,10 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 .btn-secondaire { background: var(--surface); border: 1px solid var(--bordure); color: var(--texte-doux); }
 .btn-secondaire:active { background: var(--surface-2); }
 .btn-danger { background: var(--rouge-doux); border: 1px solid var(--rouge-bord); color: var(--rouge-texte); }
+.btn-succes { background: var(--vert); color: var(--sur-vert); }
+.btn-succes:active { filter: brightness(0.92); }
+.actions-modale .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.actions-modale .duo button { font-size: 14px; padding: 13px 8px; }
 .pleine-largeur { display: block; width: 100%; margin-bottom: 10px; }
 
 /* ─────────── Onglets du bas ─────────── */

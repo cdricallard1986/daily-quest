@@ -149,7 +149,7 @@ html, body {
 }
 
 body {
-  padding-bottom: calc(72px + var(--bas));
+  padding-bottom: calc(64px + var(--bas));
   min-height: 100vh;
 }
 
@@ -186,14 +186,13 @@ input.erreur { border-color: var(--rouge); }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: calc(12px + var(--haut)) 16px 12px;
+  padding: calc(8px + var(--haut)) 12px 8px;
   background: var(--fond-flou);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--bordure);
 }
-.entete-titre { display: flex; align-items: center; gap: 9px; }
-.entete h1 { font-size: 18px; }
-.logo { color: var(--or-texte); font-size: 15px; }
+.entete .nav-label { flex: 1; }
+.entete .btn-nav { width: 36px; height: 36px; font-size: 19px; }
 
 .btn-icone {
   width: 38px;
@@ -208,7 +207,7 @@ input.erreur { border-color: var(--rouge); }
 }
 .btn-icone:active { background: var(--surface-2); }
 
-main { padding: 16px; max-width: 720px; margin: 0 auto; }
+main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 .vue.cachee, .cachee { display: none !important; }
 
 /* ─────────── Navigation de période ─────────── */
@@ -256,11 +255,11 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   margin-bottom: 16px;
 }
 
-.carte-score { display: flex; align-items: center; gap: 18px; }
+.carte-score { display: flex; align-items: center; gap: 14px; padding: 10px 12px; margin-bottom: 10px; }
 
-.anneau { position: relative; width: 108px; height: 108px; flex: none; }
+.anneau { position: relative; width: 72px; height: 72px; flex: none; }
 .anneau svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.anneau circle { fill: none; stroke-width: 9; stroke-linecap: round; }
+.anneau circle { fill: none; stroke-width: 11; stroke-linecap: round; }
 .anneau-fond { stroke: var(--surface-2); }
 .anneau-jauge {
   stroke: var(--or);
@@ -277,25 +276,25 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   align-items: center;
   justify-content: center;
 }
-.anneau-texte strong { font-size: 26px; letter-spacing: -0.03em; }
-.anneau-texte span { font-size: 12px; color: var(--texte-faible); }
+.anneau-texte strong { font-size: 19px; letter-spacing: -0.03em; }
+.anneau-texte span { font-size: 10px; color: var(--texte-faible); }
 
 .stats-jour {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px 4px;
+  gap: 7px 4px;
   min-width: 0;
 }
 .stat { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.stat-val { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.stat-val { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
 .stat-lib { font-size: 10.5px; color: var(--texte-faible); white-space: nowrap; }
 
 .barre-xp {
   grid-column: 1 / -1;
   position: relative;
-  height: 20px;
-  border-radius: 10px;
+  height: 17px;
+  border-radius: 9px;
   background: var(--surface-2);
   overflow: hidden;
 }
@@ -318,66 +317,69 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 }
 
 /* ─────────── Liste des habitudes ─────────── */
-.liste-habitudes { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
+.liste-habitudes { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 
+/* --h-ligne est calculée au rendu pour que toutes les habitudes tiennent
+   à l'écran sans défilement (voir ajusterDensite dans app.js). */
 .habitude {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  height: var(--h-ligne, 52px);
+  padding: 0 10px;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--bordure);
-  border-radius: var(--rayon);
-  padding: 12px 14px;
+  border-radius: 12px;
   transition: border-color 0.2s, background 0.2s;
 }
 .habitude.faite { border-color: rgba(var(--vert-rgb), 0.45); background: linear-gradient(90deg, var(--vert-doux), var(--surface) 60%); }
 
 .hab-emoji {
-  width: 40px;
-  height: 40px;
+  width: calc(var(--h-ligne, 52px) - 14px);
+  height: calc(var(--h-ligne, 52px) - 14px);
+  max-width: 34px;
+  max-height: 34px;
   flex: none;
   display: grid;
   place-items: center;
-  font-size: 20px;
-  border-radius: 12px;
+  font-size: 17px;
+  border-radius: 9px;
   background: var(--surface-2);
 }
 .habitude.faite .hab-emoji { background: var(--vert-doux); }
 
-.hab-infos { flex: 1; min-width: 0; }
-.hab-nom { font-size: 15px; font-weight: 600; line-height: 1.25; }
-.habitude.faite .hab-nom { color: var(--vert-texte); }
-.hab-detail { font-size: 12px; color: var(--texte-faible); margin-top: 2px; }
-
-.hab-jauge {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--surface-2);
-  margin-top: 6px;
+.hab-nom {
+  flex: 1;
+  min-width: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
-.hab-jauge i { display: block; height: 100%; background: var(--or); border-radius: 2px; transition: width 0.3s; }
-.habitude.faite .hab-jauge i { background: var(--vert); }
+.habitude.faite .hab-nom { color: var(--vert-texte); }
 
-.hab-coche {
+/* Filet de progression collé au bas de la ligne : informe sans coûter
+   de hauteur. */
+.hab-filet {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--or);
+  border-radius: 0 3px 0 0;
+  transition: width 0.3s;
+}
+.habitude.faite .hab-filet { background: var(--vert); }
+
+.hab-quant { display: flex; align-items: center; gap: 5px; flex: none; }
+.btn-pas {
   width: 34px;
   height: 34px;
-  flex: none;
-  border-radius: 50%;
-  border: 2px solid var(--bordure);
-  display: grid;
-  place-items: center;
-  font-size: 16px;
-  color: transparent;
-  transition: all 0.18s;
-}
-.habitude.faite .hab-coche { background: var(--vert); border-color: var(--vert-texte); color: var(--sur-vert); }
-
-.hab-quant { display: flex; align-items: center; gap: 6px; flex: none; }
-.btn-pas {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  border-radius: 9px;
   background: var(--surface-2);
   border: 1px solid var(--bordure);
   font-size: 17px;
@@ -388,18 +390,33 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 }
 .btn-pas:active { background: var(--bordure); }
 .hab-valeur {
-  min-width: 46px;
+  min-width: 58px;
   text-align: center;
   font-variant-numeric: tabular-nums;
   font-weight: 650;
-  font-size: 14px;
+  font-size: 12.5px;
   padding: 4px 2px;
   border-radius: 8px;
+  color: var(--texte-doux);
 }
 .habitude.faite .hab-valeur { color: var(--vert-texte); }
 
+.hab-coche {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--bordure);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  color: transparent;
+  transition: all 0.18s;
+}
+.habitude.faite .hab-coche { background: var(--vert); border-color: var(--vert); color: var(--sur-vert); }
+
 /* ─────────── Boutons ─────────── */
-.btn-primaire, .btn-secondaire, .btn-danger {
+.btn-primaire, .btn-secondaire, .btn-danger, .btn-succes {
   border-radius: 12px;
   padding: 13px 16px;
   font-weight: 600;
@@ -411,6 +428,10 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 .btn-secondaire { background: var(--surface); border: 1px solid var(--bordure); color: var(--texte-doux); }
 .btn-secondaire:active { background: var(--surface-2); }
 .btn-danger { background: var(--rouge-doux); border: 1px solid var(--rouge-bord); color: var(--rouge-texte); }
+.btn-succes { background: var(--vert); color: var(--sur-vert); }
+.btn-succes:active { filter: brightness(0.92); }
+.actions-modale .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.actions-modale .duo button { font-size: 14px; padding: 13px 8px; }
 .pleine-largeur { display: block; width: 100%; margin-bottom: 10px; }
 
 /* ─────────── Onglets du bas ─────────── */
@@ -789,26 +810,21 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 </head>
 <body>
 
+<!-- En-tête = navigation : la même barre sert la journée et l'historique,
+     ce qui économise la hauteur d'un bandeau de titre. -->
 <header class="entete">
-  <div class="entete-titre">
-    <span class="logo" aria-hidden="true">◆</span>
-    <h1>Daily Quest</h1>
+  <button class="btn-nav" id="nav-prec" type="button" aria-label="Précédent">‹</button>
+  <div class="nav-label">
+    <span id="nav-titre">—</span>
+    <small id="nav-sous-titre"></small>
   </div>
+  <button class="btn-nav" id="nav-suiv" type="button" aria-label="Suivant">›</button>
   <button class="btn-icone" id="btn-reglages" type="button" aria-label="Réglages">⚙</button>
 </header>
 
 <main>
   <!-- ══════════ ONGLET AUJOURD'HUI ══════════ -->
   <section class="vue" id="vue-jour" aria-label="Journée">
-
-    <div class="nav-periode">
-      <button class="btn-nav" id="jour-prec" type="button" aria-label="Jour précédent">‹</button>
-      <div class="nav-label">
-        <span id="jour-titre">—</span>
-        <small id="jour-sous-titre"></small>
-      </div>
-      <button class="btn-nav" id="jour-suiv" type="button" aria-label="Jour suivant">›</button>
-    </div>
 
     <div class="carte carte-score">
       <div class="anneau">
@@ -842,10 +858,6 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     </div>
 
     <ul class="liste-habitudes" id="liste-habitudes"></ul>
-
-    <button class="btn-secondaire pleine-largeur" id="btn-gerer" type="button">
-      Gérer mes habitudes
-    </button>
   </section>
 
   <!-- ══════════ ONGLET HISTORIQUE ══════════ -->
@@ -855,15 +867,6 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
       <button class="segment actif" data-mode="semaine" role="tab" type="button">Semaine</button>
       <button class="segment" data-mode="mois" role="tab" type="button">Mois</button>
       <button class="segment" data-mode="annee" role="tab" type="button">Année</button>
-    </div>
-
-    <div class="nav-periode">
-      <button class="btn-nav" id="periode-prec" type="button" aria-label="Période précédente">‹</button>
-      <div class="nav-label">
-        <span id="periode-titre">—</span>
-        <small id="periode-sous-titre"></small>
-      </div>
-      <button class="btn-nav" id="periode-suiv" type="button" aria-label="Période suivante">›</button>
     </div>
 
     <div class="carte resume">
@@ -963,7 +966,10 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 
     <div class="actions-modale">
       <button class="btn-primaire pleine-largeur cachee" id="btn-creer" type="button">Créer l'habitude</button>
-      <button class="btn-danger pleine-largeur cachee" id="btn-supprimer" type="button">Supprimer / archiver</button>
+      <div class="duo cachee" id="actions-edition">
+        <button class="btn-succes" id="btn-termine" type="button">✓ Terminé</button>
+        <button class="btn-danger" id="btn-supprimer" type="button">Supprimer / archiver</button>
+      </div>
     </div>
   </div>
 </div>
@@ -975,6 +981,8 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
   </div>
   <div class="modale-corps">
+    <button class="btn-primaire pleine-largeur" id="btn-gerer" type="button">Gérer mes habitudes</button>
+
     <div class="champ">
       <span>Apparence</span>
       <div class="choix trois" id="ch-theme">
@@ -1045,7 +1053,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.08.17-4';
+  const VERSION = '2026.08.17-5';
 
   const CLE_STOCKAGE = 'dq.v1';
   const CLE_BROUILLON = 'dq.brouillon';
@@ -1367,6 +1375,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   const $$ = (sel) => Array.prototype.slice.call(document.querySelectorAll(sel));
 
   let jourCourant = aujourdHui();
+  let suivaitAujourdHui = true;   // l'écran affiche-t-il la journée en cours ?
   let modeHistorique = 'semaine';
   let ancreHistorique = aujourdHui();
 
@@ -1379,13 +1388,14 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     const score = scoreJour(cle, habs);
 
     // En-tête de date
-    $('#jour-titre').textContent = fmtDateLongue(jourCourant);
+    $('#nav-titre').textContent = fmtDateLongue(jourCourant);
     const estAujourdHui = memeJour(jourCourant, aujourdHui());
     const hier = memeJour(jourCourant, ajouterJours(aujourdHui(), -1));
-    $('#jour-sous-titre').textContent = estAujourdHui
+    $('#nav-sous-titre').textContent = estAujourdHui
       ? "Aujourd'hui · " + jourCourant.getFullYear()
       : hier ? 'Hier · ' + jourCourant.getFullYear() : String(jourCourant.getFullYear());
-    $('#jour-suiv').disabled = estAujourdHui;
+    $('#nav-suiv').disabled = estAujourdHui;
+    suivaitAujourdHui = estAujourdHui;
 
     // Anneau de progression
     const circonference = 2 * Math.PI * 52;
@@ -1428,27 +1438,13 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
       emoji.textContent = h.emoji || '•';
       li.appendChild(emoji);
 
-      const infos = document.createElement('div');
-      infos.className = 'hab-infos';
+      // Une seule ligne par habitude : l'objectif est intégré à la valeur
+      // (« 2,5/3 L ») et la progression passe en filet sous la carte, pour
+      // que les douze points tiennent sans défilement.
       const nom = document.createElement('div');
       nom.className = 'hab-nom';
       nom.textContent = h.nom;
-      infos.appendChild(nom);
-
-      if (h.type === 'quant') {
-        const detail = document.createElement('div');
-        detail.className = 'hab-detail';
-        detail.textContent = 'Objectif ' + fmt(h.cible) + ' ' + (h.unite || '');
-        infos.appendChild(detail);
-
-        const jaugeH = document.createElement('div');
-        jaugeH.className = 'hab-jauge';
-        const barre = document.createElement('i');
-        barre.style.width = (progression(h, valeurs) * 100) + '%';
-        jaugeH.appendChild(barre);
-        infos.appendChild(jaugeH);
-      }
-      li.appendChild(infos);
+      li.appendChild(nom);
 
       if (h.type === 'quant') {
         const zone = document.createElement('div');
@@ -1465,7 +1461,8 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
         val.className = 'hab-valeur';
         val.type = 'button';
         val.dataset.action = 'saisir';
-        val.textContent = fmt(valeurBrute(h, valeurs)) + (h.unite ? ' ' + h.unite : '');
+        val.textContent = fmt(valeurBrute(h, valeurs)) + '/' + fmt(h.cible) +
+          (h.unite ? ' ' + h.unite : '');
 
         const plus = document.createElement('button');
         plus.className = 'btn-pas';
@@ -1478,6 +1475,11 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
         zone.appendChild(val);
         zone.appendChild(plus);
         li.appendChild(zone);
+
+        const filet = document.createElement('i');
+        filet.className = 'hab-filet';
+        filet.style.width = (progression(h, valeurs) * 100) + '%';
+        li.appendChild(filet);
       } else {
         const coche = document.createElement('button');
         coche.className = 'hab-coche';
@@ -1491,6 +1493,28 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 
       liste.appendChild(li);
     });
+
+    ajusterDensite();
+  }
+
+  /**
+   * Règle la hauteur des lignes pour que toutes les habitudes tiennent
+   * sans défilement. Sous un certain seuil on arrête de comprimer : mieux
+   * vaut défiler que de rendre les lignes illisibles.
+   */
+  function ajusterDensite() {
+    const liste = $('#liste-habitudes');
+    const nb = liste.children.length;
+    if (!nb) return;
+
+    const ECART = 6;
+    const haut = liste.getBoundingClientRect().top;
+    const onglets = document.querySelector('.onglets').getBoundingClientRect().height;
+    const dispo = window.innerHeight - haut - onglets - 10;
+    const brut = Math.floor((dispo - ECART * (nb - 1)) / nb);
+    const hauteur = Math.max(34, Math.min(58, brut));
+
+    document.documentElement.style.setProperty('--h-ligne', hauteur + 'px');
   }
 
   function surClicHabitude(evt) {
@@ -1602,17 +1626,17 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
       const debut = debutSemaine(ancreHistorique);
       const fin = ajouterJours(debut, 6);
       const memeMois = debut.getMonth() === fin.getMonth();
-      $('#periode-titre').textContent = debut.getDate() + (memeMois ? '' : ' ' + MOIS_COURTS[debut.getMonth()]) +
+      $('#nav-titre').textContent = debut.getDate() + (memeMois ? '' : ' ' + MOIS_COURTS[debut.getMonth()]) +
         ' – ' + fin.getDate() + ' ' + MOIS_NOMS[fin.getMonth()];
-      $('#periode-sous-titre').textContent = 'Semaine ' + numeroSemaine(debut) + ' · ' + fin.getFullYear();
+      $('#nav-sous-titre').textContent = 'Semaine ' + numeroSemaine(debut) + ' · ' + fin.getFullYear();
     } else if (modeHistorique === 'mois') {
-      $('#periode-titre').textContent = majuscule(MOIS_NOMS[ancreHistorique.getMonth()]) + ' ' + ancreHistorique.getFullYear();
-      $('#periode-sous-titre').textContent = cles.length + ' jours';
+      $('#nav-titre').textContent = majuscule(MOIS_NOMS[ancreHistorique.getMonth()]) + ' ' + ancreHistorique.getFullYear();
+      $('#nav-sous-titre').textContent = cles.length + ' jours';
     } else {
-      $('#periode-titre').textContent = String(ancreHistorique.getFullYear());
-      $('#periode-sous-titre').textContent = cles.length + ' jours';
+      $('#nav-titre').textContent = String(ancreHistorique.getFullYear());
+      $('#nav-sous-titre').textContent = cles.length + ' jours';
     }
-    $('#periode-suiv').disabled = periodeEstCourante();
+    $('#nav-suiv').disabled = periodeEstCourante();
 
     // Résumé
     $('#res-moyenne').textContent = Math.round(donnees.moyenne * 100) + '%';
@@ -1960,12 +1984,36 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 
   /* ─────────────── Navigation entre onglets ─────────────── */
 
+  let vueActive = 'jour';
+
   function basculerVue(nom) {
+    vueActive = nom;
     $$('.onglet').forEach((o) => o.classList.toggle('actif', o.dataset.vue === nom));
     $('#vue-jour').classList.toggle('cachee', nom !== 'jour');
     $('#vue-historique').classList.toggle('cachee', nom !== 'historique');
     window.scrollTo(0, 0);
     if (nom === 'historique') rendreHistorique();
+    else rendreJour();
+  }
+
+  /** Les flèches de l'en-tête pilotent la vue affichée. */
+  function reculer() {
+    if (vueActive === 'jour') {
+      jourCourant = ajouterJours(jourCourant, -1);
+      rendreJour();
+    } else {
+      decalerPeriode(-1);
+    }
+  }
+
+  function avancer() {
+    if (vueActive === 'jour') {
+      if (memeJour(jourCourant, aujourdHui())) return;
+      jourCourant = ajouterJours(jourCourant, 1);
+      rendreJour();
+    } else {
+      decalerPeriode(1);
+    }
   }
 
   /* ─────────────── Modales ─────────────── */
@@ -2147,7 +2195,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     majTypeUI(h.type || 'bool');
 
     $('#btn-creer').classList.toggle('cachee', !creation);
-    $('#btn-supprimer').classList.toggle('cachee', creation);
+    $('#actions-edition').classList.toggle('cachee', creation);
     majPill(creation ? 'neutre' : 'ajour');
 
     ouvrirModale('#modale-habitude');
@@ -2386,19 +2434,16 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     // Onglets
     $$('.onglet').forEach((o) => o.addEventListener('click', () => basculerVue(o.dataset.vue)));
 
-    // Navigation jour
-    $('#jour-prec').addEventListener('click', () => {
-      jourCourant = ajouterJours(jourCourant, -1);
-      rendreJour();
-    });
-    $('#jour-suiv').addEventListener('click', () => {
-      if (memeJour(jourCourant, aujourdHui())) return;
-      jourCourant = ajouterJours(jourCourant, 1);
-      rendreJour();
-    });
+    // Navigation partagée (en-tête) : jour ou période selon l'onglet actif.
+    $('#nav-prec').addEventListener('click', reculer);
+    $('#nav-suiv').addEventListener('click', avancer);
 
     // Habitudes du jour
     $('#liste-habitudes').addEventListener('click', surClicHabitude);
+
+    // La densité dépend de la hauteur utile : à recalculer si elle change.
+    window.addEventListener('resize', () => { if (vueActive === 'jour') ajusterDensite(); });
+    window.addEventListener('orientationchange', () => setTimeout(ajusterDensite, 200));
 
     // Historique
     $$('.segment').forEach((s) => s.addEventListener('click', () => {
@@ -2407,14 +2452,18 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
       $$('.segment').forEach((x) => x.classList.toggle('actif', x === s));
       rendreHistorique();
     }));
-    $('#periode-prec').addEventListener('click', () => decalerPeriode(-1));
-    $('#periode-suiv').addEventListener('click', () => decalerPeriode(1));
 
-    // Gestion
-    $('#btn-gerer').addEventListener('click', () => { rendreGestion(); ouvrirModale('#modale-gestion'); });
+    // Gestion (accessible depuis les réglages)
+    $('#btn-gerer').addEventListener('click', () => {
+      fermerModales();
+      rendreGestion();
+      ouvrirModale('#modale-gestion');
+    });
     $('#btn-ajouter').addEventListener('click', () => ouvrirEditeur(null));
     $('#btn-creer').addEventListener('click', creerHabitude);
     $('#btn-supprimer').addEventListener('click', demanderSuppression);
+    // Bouton vert : tout est déjà enregistré, il ne fait que refermer.
+    $('#btn-termine').addEventListener('click', fermerAvecFlush);
 
     // Éditeur : auto-enregistrement
     ['#ch-nom', '#ch-emoji', '#ch-cible', '#ch-unite', '#ch-pas'].forEach((sel) => {
@@ -2487,10 +2536,11 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     brancher();
     rendreJour();
 
-    // Si l'app reste ouverte au passage de minuit, on recale la date.
+    // Si l'app reste ouverte au passage de minuit, on recale la date —
+    // uniquement si l'utilisateur regardait bien la journée en cours.
     setInterval(() => {
-      if ($('#vue-jour').classList.contains('cachee')) return;
-      if ($('#jour-suiv').disabled && !memeJour(jourCourant, aujourdHui())) {
+      if (vueActive !== 'jour' || !suivaitAujourdHui) return;
+      if (!memeJour(jourCourant, aujourdHui())) {
         jourCourant = aujourdHui();
         rendreJour();
       }
