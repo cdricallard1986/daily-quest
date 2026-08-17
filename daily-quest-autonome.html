@@ -5,19 +5,102 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Daily Quest</title>
 <meta name="description" content="Suivi quotidien d'habitudes — coches, quantités et historique semaine / mois / année.">
-<meta name="theme-color" content="#0b0e14">
+<meta name="theme-color" content="#f4f6f9">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Daily Quest">
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkRhaWx5IFF1ZXN0Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ib3IiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZiZTQ0Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Y2OGEwYyIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTgiIGZpbGw9InVybCgjb3IpIi8+CiAgPHBhdGggZD0iTTEzOCAyNzEgTDIyMCAzNTMgTDM4NCAxNjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE0MGYwNCIKICAgICAgICBzdHJva2Utd2lkdGg9IjU0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==">
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkRhaWx5IFF1ZXN0Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ib3IiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZiZTQ0Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Y2OGEwYyIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTgiIGZpbGw9InVybCgjb3IpIi8+CiAgPHBhdGggZD0iTTEzOCAyNzEgTDIyMCAzNTMgTDM4NCAxNjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE0MGYwNCIKICAgICAgICBzdHJva2Utd2lkdGg9IjU0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==" type="image/svg+xml">
 <style>
 /* ══════════════════════════════════════════════
    Daily Quest — feuille de styles
-   Mobile-first, thème sombre.
+   Mobile-first. Thème clair et sombre, pilotés par des variables.
    ══════════════════════════════════════════════ */
 
+/* ── Palette claire (thème par défaut) ────────────────────────────
+   Les couleurs « …-texte » servent aux libellés : sur fond blanc, les
+   teintes vives manquent de contraste, on utilise donc une version plus
+   sombre pour tout ce qui est lu. */
 :root {
+  --fond: #f4f6f9;
+  --fond-2: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #eef1f6;
+  --bordure: #dce1ea;
+  --texte: #101521;
+  --texte-doux: #4f596b;
+  --texte-faible: #7b8598;
+
+  --or: #e59400;
+  --or-clair: #ffb43d;
+  --or-texte: #a35c00;
+  --or-doux: rgba(229, 148, 0, 0.14);
+  --or-bord: rgba(229, 148, 0, 0.5);
+  --sur-or: #241500;
+
+  --vert: #10b981;
+  --vert-rgb: 16, 185, 129;
+  --vert-texte: #047857;
+  --vert-doux: rgba(16, 185, 129, 0.14);
+  --sur-vert: #ffffff;
+
+  --rouge: #dc2626;
+  --rouge-texte: #b91c1c;
+  --rouge-doux: rgba(220, 38, 38, 0.1);
+  --rouge-bord: rgba(220, 38, 38, 0.3);
+
+  --fond-flou: rgba(244, 246, 249, 0.88);
+  --voile-fond: rgba(15, 23, 42, 0.42);
+  --heat-fort: #06301f;
+  --ombre: 0 8px 24px rgba(15, 23, 42, 0.14);
+
+  --rayon: 16px;
+  --rayon-s: 10px;
+  --haut: env(safe-area-inset-top, 0px);
+  --bas: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Palette sombre ───────────────────────────────────────────────
+   Deux blocs identiques : l'un suit le réglage du téléphone (mode Auto),
+   l'autre s'applique quand l'utilisateur force le sombre dans l'app.
+   GARDER LES DEUX SYNCHRONISÉS. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fond: #0b0e14;
+    --fond-2: #10141d;
+    --surface: #161b26;
+    --surface-2: #1e2533;
+    --bordure: #262e3d;
+    --texte: #e8ebf2;
+    --texte-doux: #98a2b6;
+    --texte-faible: #64708a;
+
+    --or: #ffb020;
+    --or-clair: #ffd166;
+    --or-texte: #ffb020;
+    --or-doux: rgba(255, 176, 32, 0.14);
+    --or-bord: rgba(255, 176, 32, 0.5);
+    --sur-or: #221600;
+
+    --vert: #34d399;
+    --vert-rgb: 52, 211, 153;
+    --vert-texte: #34d399;
+    --vert-doux: rgba(52, 211, 153, 0.14);
+    --sur-vert: #04240f;
+
+    --rouge: #f87171;
+    --rouge-texte: #f87171;
+    --rouge-doux: rgba(248, 113, 113, 0.12);
+    --rouge-bord: rgba(248, 113, 113, 0.35);
+
+    --fond-flou: rgba(11, 14, 20, 0.88);
+    --voile-fond: rgba(0, 0, 0, 0.62);
+    --heat-fort: #04240f;
+    --ombre: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+}
+
+:root[data-theme="dark"] {
   --fond: #0b0e14;
   --fond-2: #10141d;
   --surface: #161b26;
@@ -26,18 +109,29 @@
   --texte: #e8ebf2;
   --texte-doux: #98a2b6;
   --texte-faible: #64708a;
+
   --or: #ffb020;
+  --or-clair: #ffd166;
+  --or-texte: #ffb020;
   --or-doux: rgba(255, 176, 32, 0.14);
+  --or-bord: rgba(255, 176, 32, 0.5);
+  --sur-or: #221600;
+
   --vert: #34d399;
+  --vert-rgb: 52, 211, 153;
+  --vert-texte: #34d399;
   --vert-doux: rgba(52, 211, 153, 0.14);
+  --sur-vert: #04240f;
+
   --rouge: #f87171;
+  --rouge-texte: #f87171;
   --rouge-doux: rgba(248, 113, 113, 0.12);
-  --bleu: #60a5fa;
-  --rayon: 16px;
-  --rayon-s: 10px;
+  --rouge-bord: rgba(248, 113, 113, 0.35);
+
+  --fond-flou: rgba(11, 14, 20, 0.88);
+  --voile-fond: rgba(0, 0, 0, 0.62);
+  --heat-fort: #04240f;
   --ombre: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --haut: env(safe-area-inset-top, 0px);
-  --bas: env(safe-area-inset-bottom, 0px);
 }
 
 * { box-sizing: border-box; }
@@ -93,13 +187,13 @@ input.erreur { border-color: var(--rouge); }
   justify-content: space-between;
   gap: 12px;
   padding: calc(12px + var(--haut)) 16px 12px;
-  background: rgba(11, 14, 20, 0.86);
+  background: var(--fond-flou);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--bordure);
 }
 .entete-titre { display: flex; align-items: center; gap: 9px; }
 .entete h1 { font-size: 18px; }
-.logo { color: var(--or); font-size: 15px; }
+.logo { color: var(--or-texte); font-size: 15px; }
 
 .btn-icone {
   width: 38px;
@@ -209,7 +303,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   position: absolute;
   inset: 0 auto 0 0;
   width: 0;
-  background: linear-gradient(90deg, var(--or), #ffd166);
+  background: linear-gradient(90deg, var(--or), var(--or-clair));
   transition: width 0.45s ease;
 }
 .barre-xp span {
@@ -220,7 +314,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   font-size: 11px;
   font-weight: 600;
   color: var(--texte);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: none;
 }
 
 /* ─────────── Liste des habitudes ─────────── */
@@ -236,7 +330,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   padding: 12px 14px;
   transition: border-color 0.2s, background 0.2s;
 }
-.habitude.faite { border-color: rgba(52, 211, 153, 0.45); background: linear-gradient(90deg, var(--vert-doux), var(--surface) 60%); }
+.habitude.faite { border-color: rgba(var(--vert-rgb), 0.45); background: linear-gradient(90deg, var(--vert-doux), var(--surface) 60%); }
 
 .hab-emoji {
   width: 40px;
@@ -252,7 +346,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 
 .hab-infos { flex: 1; min-width: 0; }
 .hab-nom { font-size: 15px; font-weight: 600; line-height: 1.25; }
-.habitude.faite .hab-nom { color: var(--vert); }
+.habitude.faite .hab-nom { color: var(--vert-texte); }
 .hab-detail { font-size: 12px; color: var(--texte-faible); margin-top: 2px; }
 
 .hab-jauge {
@@ -277,7 +371,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   color: transparent;
   transition: all 0.18s;
 }
-.habitude.faite .hab-coche { background: var(--vert); border-color: var(--vert); color: #04240f; }
+.habitude.faite .hab-coche { background: var(--vert); border-color: var(--vert-texte); color: var(--sur-vert); }
 
 .hab-quant { display: flex; align-items: center; gap: 6px; flex: none; }
 .btn-pas {
@@ -302,7 +396,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   padding: 4px 2px;
   border-radius: 8px;
 }
-.habitude.faite .hab-valeur { color: var(--vert); }
+.habitude.faite .hab-valeur { color: var(--vert-texte); }
 
 /* ─────────── Boutons ─────────── */
 .btn-primaire, .btn-secondaire, .btn-danger {
@@ -312,11 +406,11 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   font-size: 15px;
   text-align: center;
 }
-.btn-primaire { background: var(--or); color: #221600; }
+.btn-primaire { background: var(--or); color: var(--sur-or); }
 .btn-primaire:active { filter: brightness(0.92); }
 .btn-secondaire { background: var(--surface); border: 1px solid var(--bordure); color: var(--texte-doux); }
 .btn-secondaire:active { background: var(--surface-2); }
-.btn-danger { background: var(--rouge-doux); border: 1px solid rgba(248, 113, 113, 0.35); color: var(--rouge); }
+.btn-danger { background: var(--rouge-doux); border: 1px solid var(--rouge-bord); color: var(--rouge-texte); }
 .pleine-largeur { display: block; width: 100%; margin-bottom: 10px; }
 
 /* ─────────── Onglets du bas ─────────── */
@@ -330,7 +424,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   grid-template-columns: 1fr 1fr;
   gap: 4px;
   padding: 8px 12px calc(8px + var(--bas));
-  background: rgba(11, 14, 20, 0.92);
+  background: var(--fond-flou);
   backdrop-filter: blur(14px);
   border-top: 1px solid var(--bordure);
 }
@@ -346,7 +440,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   color: var(--texte-faible);
 }
 .onglet-icone { font-size: 18px; line-height: 1.1; }
-.onglet.actif { color: var(--or); background: var(--or-doux); }
+.onglet.actif { color: var(--or-texte); background: var(--or-doux); }
 
 /* ─────────── Segments (semaine/mois/année) ─────────── */
 .segments {
@@ -367,7 +461,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   color: var(--texte-faible);
   text-align: center;
 }
-.segment.actif { background: var(--or); color: #221600; }
+.segment.actif { background: var(--or); color: var(--sur-or); }
 
 /* ─────────── Résumé ─────────── */
 .resume { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 14px 10px; }
@@ -395,7 +489,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   text-align: center;
   width: 34px;
 }
-.tab-semaine thead th.aujourdhui { color: var(--or); }
+.tab-semaine thead th.aujourdhui { color: var(--or-texte); }
 .tab-semaine thead th small { display: block; font-size: 10px; font-weight: 500; opacity: 0.75; }
 .col-hab { text-align: left !important; width: auto !important; min-width: 96px; }
 .cel-hab {
@@ -418,10 +512,10 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   display: grid;
   place-items: center;
   font-size: 12px;
-  color: var(--vert);
+  color: var(--vert-texte);
 }
-.pastille.ok { background: var(--vert); border-color: var(--vert); color: #04240f; }
-.pastille.partiel { background: var(--or-doux); border-color: rgba(255, 176, 32, 0.5); color: var(--or); font-size: 9px; font-weight: 700; }
+.pastille.ok { background: var(--vert); border-color: var(--vert-texte); color: var(--sur-vert); }
+.pastille.partiel { background: var(--or-doux); border-color: var(--or-bord); color: var(--or-texte); font-size: 9px; font-weight: 700; }
 .ligne-total td { padding-top: 8px !important; }
 .total-jour {
   font-size: 11px;
@@ -495,7 +589,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 .barre-ligne { display: flex; align-items: center; gap: 10px; }
 .barre-lib { width: 34px; font-size: 11.5px; color: var(--texte-faible); flex: none; text-transform: capitalize; }
 .barre-piste { flex: 1; height: 18px; border-radius: 9px; background: var(--surface-2); overflow: hidden; }
-.barre-piste i { display: block; height: 100%; background: linear-gradient(90deg, var(--or), #ffd166); border-radius: 9px; }
+.barre-piste i { display: block; height: 100%; background: linear-gradient(90deg, var(--or), var(--or-clair)); border-radius: 9px; }
 .barre-val { width: 40px; text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--texte-doux); flex: none; }
 
 /* ─────────── Détail par habitude ─────────── */
@@ -512,7 +606,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 .detail-corps { flex: 1; min-width: 0; }
 .detail-haut { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
 .detail-nom { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.detail-chiffre { font-size: 13px; font-weight: 700; color: var(--or); flex: none; font-variant-numeric: tabular-nums; }
+.detail-chiffre { font-size: 13px; font-weight: 700; color: var(--or-texte); flex: none; font-variant-numeric: tabular-nums; }
 .detail-sous { font-size: 11.5px; color: var(--texte-faible); margin-top: 1px; }
 .detail-jauge { height: 5px; border-radius: 3px; background: var(--surface-2); margin-top: 7px; overflow: hidden; }
 .detail-jauge i { display: block; height: 100%; border-radius: 3px; background: var(--or); }
@@ -533,7 +627,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: rgba(0, 0, 0, 0.62);
+  background: var(--voile-fond);
   backdrop-filter: blur(3px);
 }
 .modale {
@@ -584,18 +678,19 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   white-space: nowrap;
   transition: opacity 0.3s;
 }
-.pill.enregistre { background: var(--vert-doux); color: var(--vert); }
-.pill.modifie { background: var(--or-doux); color: var(--or); }
-.pill.erreur { background: var(--rouge-doux); color: var(--rouge); }
+.pill.enregistre { background: var(--vert-doux); color: var(--vert-texte); }
+.pill.modifie { background: var(--or-doux); color: var(--or-texte); }
+.pill.erreur { background: var(--rouge-doux); color: var(--rouge-texte); }
 
 .champ { display: block; margin-bottom: 14px; }
 .champ > span { display: block; font-size: 12.5px; color: var(--texte-doux); margin-bottom: 6px; }
 .ligne-champs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .ligne-slider { display: flex; align-items: center; gap: 12px; }
-.ligne-slider input[type="range"] { flex: 1; accent-color: var(--or); }
+.ligne-slider input[type="range"] { flex: 1; accent-color: var(--or-texte); }
 .ligne-slider output { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 48px; text-align: right; }
 
 .choix { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.choix.trois { grid-template-columns: repeat(3, 1fr); }
 .choix-btn {
   padding: 11px;
   border-radius: 10px;
@@ -605,7 +700,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   font-weight: 600;
   color: var(--texte-faible);
 }
-.choix-btn.actif { background: var(--or-doux); border-color: var(--or); color: var(--or); }
+.choix-btn.actif { background: var(--or-doux); border-color: var(--or-texte); color: var(--or-texte); }
 
 .actions-modale { margin-top: 18px; }
 .aide { font-size: 12px; color: var(--texte-faible); margin: 10px 0 0; }
@@ -674,10 +769,21 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   max-width: 90vw;
   text-align: center;
 }
-.toast.succes { border-color: rgba(52, 211, 153, 0.5); color: var(--vert); }
-.toast.erreur { border-color: rgba(248, 113, 113, 0.5); color: var(--rouge); }
+.toast.succes { border-color: var(--vert-texte); color: var(--vert-texte); }
+.toast.erreur { border-color: var(--rouge-texte); color: var(--rouge-texte); }
 
 </style>
+<script>
+/* Applique le thème choisi avant le premier rendu : sans ça, une app réglée
+   en sombre afficherait un éclair blanc au lancement. */
+(function () {
+  try {
+    var t = (JSON.parse(localStorage.getItem('dq.v1') || '{}').reglages || {}).theme;
+    if (t === 'clair') document.documentElement.setAttribute('data-theme', 'light');
+    else if (t === 'sombre') document.documentElement.setAttribute('data-theme', 'dark');
+  } catch (e) { /* premier lancement : on reste en mode automatique */ }
+})();
+</script>
 </head>
 <body>
 
@@ -867,6 +973,16 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
   </div>
   <div class="modale-corps">
+    <div class="champ">
+      <span>Apparence</span>
+      <div class="choix trois" id="ch-theme">
+        <button class="choix-btn" data-theme="auto" type="button">Auto</button>
+        <button class="choix-btn" data-theme="clair" type="button">Clair</button>
+        <button class="choix-btn" data-theme="sombre" type="button">Sombre</button>
+      </div>
+      <p class="aide" id="aide-theme"></p>
+    </div>
+
     <label class="champ">
       <span>Objectif pour valider une journée (série 🔥)</span>
       <div class="ligne-slider">
@@ -1011,7 +1127,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
         archivee: false
       }, h)),
       jours: {},
-      reglages: { objectif: 80 }
+      reglages: { objectif: 80, theme: 'auto' }
     };
   }
 
@@ -1022,7 +1138,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
       const donnees = JSON.parse(brut);
       if (!donnees || !Array.isArray(donnees.habitudes)) return etatParDefaut();
       donnees.jours = donnees.jours || {};
-      donnees.reglages = Object.assign({ objectif: 80 }, donnees.reglages);
+      donnees.reglages = Object.assign({ objectif: 80, theme: 'auto' }, donnees.reglages);
       return donnees;
     } catch (e) {
       console.error('Lecture du stockage impossible', e);
@@ -1192,16 +1308,49 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     sauver();
   }
 
+  /* ─────────────── Thème clair / sombre ─────────────── */
+
+  const prefereSombre = window.matchMedia
+    ? window.matchMedia('(prefers-color-scheme: dark)')
+    : null;
+
+  /** Thème réellement affiché, une fois « auto » résolu. */
+  function themeEffectif() {
+    const choix = etat.reglages.theme || 'auto';
+    if (choix === 'clair') return 'light';
+    if (choix === 'sombre') return 'dark';
+    return prefereSombre && prefereSombre.matches ? 'dark' : 'light';
+  }
+
+  function appliquerTheme() {
+    const choix = etat.reglages.theme || 'auto';
+    const racine = document.documentElement;
+
+    // En mode auto on retire l'attribut : la feuille de styles suit alors
+    // le réglage du téléphone via prefers-color-scheme.
+    if (choix === 'auto') racine.removeAttribute('data-theme');
+    else racine.setAttribute('data-theme', themeEffectif());
+
+    // La barre d'état iOS se teinte d'après cette balise.
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute('content',
+        getComputedStyle(racine).getPropertyValue('--fond').trim() || '#f4f6f9');
+    }
+    const barre = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (barre) barre.setAttribute('content', themeEffectif() === 'dark' ? 'black-translucent' : 'default');
+  }
+
   /* ─────────────── Vue : couleurs ─────────────── */
 
   function couleurJour(score) {
     if (score.vide) return 'var(--surface-2)';
     if (score.pct <= 0) return 'var(--surface-2)';
     const alpha = (0.18 + 0.72 * score.pct).toFixed(2);
-    return 'rgba(52, 211, 153, ' + alpha + ')';
+    return 'rgba(var(--vert-rgb), ' + alpha + ')';
   }
   function texteSurJour(score) {
-    return !score.vide && score.pct >= 0.6 ? '#04240f' : 'var(--texte-doux)';
+    return !score.vide && score.pct >= 0.6 ? 'var(--heat-fort)' : 'var(--texte-doux)';
   }
 
   /* ─────────────── DOM ─────────────── */
@@ -2147,7 +2296,18 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 
   /* ─────────────── Réglages / sauvegardes ─────────────── */
 
+  function majThemeUI() {
+    const choix = etat.reglages.theme || 'auto';
+    $$('#ch-theme .choix-btn').forEach((b) => b.classList.toggle('actif', b.dataset.theme === choix));
+    $('#aide-theme').textContent = choix === 'auto'
+      ? 'Suit le réglage de ton téléphone — actuellement ' +
+        (themeEffectif() === 'dark' ? 'sombre.' : 'clair.')
+      : 'Forcé en ' + (choix === 'clair' ? 'clair' : 'sombre') +
+        ', quel que soit le réglage du téléphone.';
+  }
+
   function ouvrirReglages() {
+    majThemeUI();
     $('#ch-objectif').value = etat.reglages.objectif;
     $('#out-objectif').textContent = etat.reglages.objectif + ' %';
     const cles = Object.keys(etat.jours).sort();
@@ -2181,8 +2341,9 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
           libelle: 'Importer', classe: 'btn-primaire', action: () => {
             etat = donnees;
             etat.jours = etat.jours || {};
-            etat.reglages = Object.assign({ objectif: 80 }, etat.reglages);
+            etat.reglages = Object.assign({ objectif: 80, theme: 'auto' }, etat.reglages);
             sauver();
+            appliquerTheme();
             rendreJour();
             rendreGestion();
             toast('Sauvegarde importée', 'succes');
@@ -2201,6 +2362,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
         etat = etatParDefaut();
         localStorage.removeItem(CLE_BROUILLON);
         sauver();
+        appliquerTheme();
         jourCourant = aujourdHui();
         rendreJour();
         rendreGestion();
@@ -2262,6 +2424,20 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 
     // Réglages
     $('#btn-reglages').addEventListener('click', ouvrirReglages);
+    $$('#ch-theme .choix-btn').forEach((b) => b.addEventListener('click', () => {
+      etat.reglages.theme = b.dataset.theme;
+      sauver();
+      appliquerTheme();
+      majThemeUI();
+    }));
+    // En mode auto, on suit le téléphone même si l'app reste ouverte.
+    if (prefereSombre && prefereSombre.addEventListener) {
+      prefereSombre.addEventListener('change', () => {
+        if ((etat.reglages.theme || 'auto') !== 'auto') return;
+        appliquerTheme();
+        if (!$('#modale-reglages').classList.contains('cachee')) majThemeUI();
+      });
+    }
     $('#ch-objectif').addEventListener('input', (e) => {
       etat.reglages.objectif = Number(e.target.value);
       $('#out-objectif').textContent = etat.reglages.objectif + ' %';
@@ -2298,6 +2474,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   function demarrer() {
     etat = charger();
     sauver();
+    appliquerTheme();
     brancher();
     rendreJour();
 

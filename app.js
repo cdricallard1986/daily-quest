@@ -95,7 +95,7 @@
         archivee: false
       }, h)),
       jours: {},
-      reglages: { objectif: 80 }
+      reglages: { objectif: 80, theme: 'auto' }
     };
   }
 
@@ -106,7 +106,7 @@
       const donnees = JSON.parse(brut);
       if (!donnees || !Array.isArray(donnees.habitudes)) return etatParDefaut();
       donnees.jours = donnees.jours || {};
-      donnees.reglages = Object.assign({ objectif: 80 }, donnees.reglages);
+      donnees.reglages = Object.assign({ objectif: 80, theme: 'auto' }, donnees.reglages);
       return donnees;
     } catch (e) {
       console.error('Lecture du stockage impossible', e);
@@ -276,16 +276,49 @@
     sauver();
   }
 
+  /* ─────────────── Thème clair / sombre ─────────────── */
+
+  const prefereSombre = window.matchMedia
+    ? window.matchMedia('(prefers-color-scheme: dark)')
+    : null;
+
+  /** Thème réellement affiché, une fois « auto » résolu. */
+  function themeEffectif() {
+    const choix = etat.reglages.theme || 'auto';
+    if (choix === 'clair') return 'light';
+    if (choix === 'sombre') return 'dark';
+    return prefereSombre && prefereSombre.matches ? 'dark' : 'light';
+  }
+
+  function appliquerTheme() {
+    const choix = etat.reglages.theme || 'auto';
+    const racine = document.documentElement;
+
+    // En mode auto on retire l'attribut : la feuille de styles suit alors
+    // le réglage du téléphone via prefers-color-scheme.
+    if (choix === 'auto') racine.removeAttribute('data-theme');
+    else racine.setAttribute('data-theme', themeEffectif());
+
+    // La barre d'état iOS se teinte d'après cette balise.
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute('content',
+        getComputedStyle(racine).getPropertyValue('--fond').trim() || '#f4f6f9');
+    }
+    const barre = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (barre) barre.setAttribute('content', themeEffectif() === 'dark' ? 'black-translucent' : 'default');
+  }
+
   /* ─────────────── Vue : couleurs ─────────────── */
 
   function couleurJour(score) {
     if (score.vide) return 'var(--surface-2)';
     if (score.pct <= 0) return 'var(--surface-2)';
     const alpha = (0.18 + 0.72 * score.pct).toFixed(2);
-    return 'rgba(52, 211, 153, ' + alpha + ')';
+    return 'rgba(var(--vert-rgb), ' + alpha + ')';
   }
   function texteSurJour(score) {
-    return !score.vide && score.pct >= 0.6 ? '#04240f' : 'var(--texte-doux)';
+    return !score.vide && score.pct >= 0.6 ? 'var(--heat-fort)' : 'var(--texte-doux)';
   }
 
   /* ─────────────── DOM ─────────────── */
@@ -1231,7 +1264,18 @@
 
   /* ─────────────── Réglages / sauvegardes ─────────────── */
 
+  function majThemeUI() {
+    const choix = etat.reglages.theme || 'auto';
+    $$('#ch-theme .choix-btn').forEach((b) => b.classList.toggle('actif', b.dataset.theme === choix));
+    $('#aide-theme').textContent = choix === 'auto'
+      ? 'Suit le réglage de ton téléphone — actuellement ' +
+        (themeEffectif() === 'dark' ? 'sombre.' : 'clair.')
+      : 'Forcé en ' + (choix === 'clair' ? 'clair' : 'sombre') +
+        ', quel que soit le réglage du téléphone.';
+  }
+
   function ouvrirReglages() {
+    majThemeUI();
     $('#ch-objectif').value = etat.reglages.objectif;
     $('#out-objectif').textContent = etat.reglages.objectif + ' %';
     const cles = Object.keys(etat.jours).sort();
@@ -1265,8 +1309,9 @@
           libelle: 'Importer', classe: 'btn-primaire', action: () => {
             etat = donnees;
             etat.jours = etat.jours || {};
-            etat.reglages = Object.assign({ objectif: 80 }, etat.reglages);
+            etat.reglages = Object.assign({ objectif: 80, theme: 'auto' }, etat.reglages);
             sauver();
+            appliquerTheme();
             rendreJour();
             rendreGestion();
             toast('Sauvegarde importée', 'succes');
@@ -1285,6 +1330,7 @@
         etat = etatParDefaut();
         localStorage.removeItem(CLE_BROUILLON);
         sauver();
+        appliquerTheme();
         jourCourant = aujourdHui();
         rendreJour();
         rendreGestion();
@@ -1346,6 +1392,20 @@
 
     // Réglages
     $('#btn-reglages').addEventListener('click', ouvrirReglages);
+    $$('#ch-theme .choix-btn').forEach((b) => b.addEventListener('click', () => {
+      etat.reglages.theme = b.dataset.theme;
+      sauver();
+      appliquerTheme();
+      majThemeUI();
+    }));
+    // En mode auto, on suit le téléphone même si l'app reste ouverte.
+    if (prefereSombre && prefereSombre.addEventListener) {
+      prefereSombre.addEventListener('change', () => {
+        if ((etat.reglages.theme || 'auto') !== 'auto') return;
+        appliquerTheme();
+        if (!$('#modale-reglages').classList.contains('cachee')) majThemeUI();
+      });
+    }
     $('#ch-objectif').addEventListener('input', (e) => {
       etat.reglages.objectif = Number(e.target.value);
       $('#out-objectif').textContent = etat.reglages.objectif + ' %';
@@ -1382,6 +1442,7 @@
   function demarrer() {
     etat = charger();
     sauver();
+    appliquerTheme();
     brancher();
     rendreJour();
 

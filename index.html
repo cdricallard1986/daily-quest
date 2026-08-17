@@ -5,14 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Daily Quest</title>
 <meta name="description" content="Suivi quotidien d'habitudes — coches, quantités et historique semaine / mois / année.">
-<meta name="theme-color" content="#0b0e14">
+<meta name="theme-color" content="#f4f6f9">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Daily Quest">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
+<script>
+/* Applique le thème choisi avant le premier rendu : sans ça, une app réglée
+   en sombre afficherait un éclair blanc au lancement. */
+(function () {
+  try {
+    var t = (JSON.parse(localStorage.getItem('dq.v1') || '{}').reglages || {}).theme;
+    if (t === 'clair') document.documentElement.setAttribute('data-theme', 'light');
+    else if (t === 'sombre') document.documentElement.setAttribute('data-theme', 'dark');
+  } catch (e) { /* premier lancement : on reste en mode automatique */ }
+})();
+</script>
 </head>
 <body>
 
@@ -202,6 +213,16 @@
     <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
   </div>
   <div class="modale-corps">
+    <div class="champ">
+      <span>Apparence</span>
+      <div class="choix trois" id="ch-theme">
+        <button class="choix-btn" data-theme="auto" type="button">Auto</button>
+        <button class="choix-btn" data-theme="clair" type="button">Clair</button>
+        <button class="choix-btn" data-theme="sombre" type="button">Sombre</button>
+      </div>
+      <p class="aide" id="aide-theme"></p>
+    </div>
+
     <label class="champ">
       <span>Objectif pour valider une journée (série 🔥)</span>
       <div class="ligne-slider">

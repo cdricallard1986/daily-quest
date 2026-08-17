@@ -1,6 +1,6 @@
 /* Service worker : met l'app en cache pour un fonctionnement hors-ligne.
    Bumper CACHE à chaque déploiement pour forcer la mise à jour. */
-const CACHE = 'daily-quest-v2';
+const CACHE = 'daily-quest-v3';
 
 const FICHIERS = [
   './',

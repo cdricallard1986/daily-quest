@@ -94,6 +94,8 @@ téléphone.
 
 Dans **Réglages ⚙** :
 
+- **Apparence** → `Auto` (suit le réglage du téléphone), `Clair` ou `Sombre` ;
+- **Objectif** → pourcentage requis pour qu'une journée compte dans la série 🔥 ;
 - **Exporter une sauvegarde** → fichier `daily-quest-AAAA-MM-JJ.json` ;
 - **Importer une sauvegarde** → restaure l'ensemble (habitudes + historique) ;
 - **Tout réinitialiser** → repart des 12 points par défaut.
@@ -105,14 +107,34 @@ Le même export permet de passer d'un appareil à l'autre.
 ## Structure du projet
 
 ```
-index.html               structure et modales
-styles.css               thème sombre, mobile-first
-app.js                   état, calculs et rendu (aucune dépendance)
-manifest.webmanifest     métadonnées PWA
-sw.js                    service worker (hors-ligne)
-icons/                   icônes générées
-tools/generer-icones.js  régénère les PNG : node tools/generer-icones.js
+index.html                          structure et modales
+styles.css                          thèmes clair / sombre, mobile-first
+app.js                              état, calculs et rendu (aucune dépendance)
+manifest.webmanifest                métadonnées PWA
+sw.js                               service worker (hors-ligne)
+daily-quest-autonome.html           l'app en un seul fichier (généré)
+icons/                              icônes générées
+tools/generer-icones.js             régénère les PNG
+tools/construire-fichier-unique.js  régénère le fichier autonome
 ```
+
+Après toute modification de `index.html`, `styles.css` ou `app.js` :
+`node tools/construire-fichier-unique.js`, et incrémenter `CACHE` dans `sw.js`
+pour que les appareils déjà installés récupèrent la mise à jour.
+
+### Thème clair / sombre
+
+`styles.css` n'utilise aucune couleur en dur hors des palettes : tout passe par
+des variables définies dans trois blocs — `:root` (clair, défaut),
+`@media (prefers-color-scheme: dark)` (mode Auto) et `:root[data-theme="dark"]`
+(sombre forcé depuis l'app). **Les deux blocs sombres doivent rester
+synchronisés.** Les jetons `--or-texte`, `--vert-texte` et `--rouge-texte` sont
+des variantes assombries réservées aux libellés, les teintes vives manquant de
+contraste sur fond blanc.
+
+Le choix (`auto` / `clair` / `sombre`) vit dans `reglages.theme`. Un court script
+en `<head>` l'applique avant le premier rendu pour éviter un flash blanc au
+lancement en mode sombre.
 
 ### Format des données
 
@@ -127,7 +149,7 @@ tools/generer-icones.js  régénère les PNG : node tools/generer-icones.js
   "jours": {
     "2026-08-17": { "h1": true, "h11": 2.5 }   // booléen ou nombre selon le type
   },
-  "reglages": { "objectif": 80 }               // % requis pour valider une journée (série)
+  "reglages": { "objectif": 80, "theme": "auto" } // % pour la série, apparence
 }
 ```
 
