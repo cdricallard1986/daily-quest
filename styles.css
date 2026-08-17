@@ -252,14 +252,14 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 .habitude.faite .hab-jauge i { background: var(--vert); }
 
 .hab-coche {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   flex: none;
   border-radius: 50%;
   border: 2px solid var(--bordure);
   display: grid;
   place-items: center;
-  font-size: 15px;
+  font-size: 16px;
   color: transparent;
   transition: all 0.18s;
 }
@@ -267,8 +267,8 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 
 .hab-quant { display: flex; align-items: center; gap: 6px; flex: none; }
 .btn-pas {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   background: var(--surface-2);
   border: 1px solid var(--bordure);
@@ -597,31 +597,49 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 .aide { font-size: 12px; color: var(--texte-faible); margin: 10px 0 0; }
 
 /* Liste de gestion */
-.liste-gestion { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
+.liste-gestion { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 10px; }
 .gestion-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   background: var(--surface);
   border: 1px solid var(--bordure);
   border-radius: 12px;
-  padding: 9px 11px;
+  padding: 6px 10px;
 }
 .gestion-item.archivee { opacity: 0.55; }
+
+/* Cible tactile principale : tout le bloc icône + nom ouvre l'édition,
+   pour ne pas dépendre d'un appui précis sur le crayon. */
+.gestion-cible {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  padding: 9px 2px 9px 0;
+  border-radius: 10px;
+}
+.gestion-cible:active { background: var(--surface-2); }
+.gestion-chevron { flex: none; color: var(--texte-faible); font-size: 20px; line-height: 1; padding-right: 2px; }
+
 .gestion-nom { flex: 1; min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gestion-nom small { display: block; font-size: 11px; color: var(--texte-faible); }
 .btn-mini {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   flex: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--surface-2);
   border: 1px solid var(--bordure);
   color: var(--texte-doux);
-  font-size: 13px;
+  font-size: 14px;
   display: grid;
   place-items: center;
 }
+.btn-mini:active:not(:disabled) { background: var(--bordure); }
 .btn-mini:disabled { opacity: 0.3; }
 
 /* Toast */

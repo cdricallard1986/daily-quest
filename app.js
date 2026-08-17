@@ -421,17 +421,20 @@
   }
 
   function surClicHabitude(evt) {
-    const bouton = evt.target.closest('[data-action]');
-    if (!bouton) return;
-    const li = bouton.closest('.habitude');
+    const li = evt.target.closest('.habitude');
     if (!li) return;
 
     const h = etat.habitudes.find((x) => x.id === li.dataset.id);
     if (!h) return;
 
+    // Sur une habitude à cocher, toute la ligne bascule l'état : cible large,
+    // plus sûre au doigt qu'une pastille de 30 px.
+    const bouton = evt.target.closest('[data-action]');
+    const action = bouton ? bouton.dataset.action : (h.type === 'bool' ? 'basculer' : null);
+    if (!action) return;
+
     const cle = cleDe(jourCourant);
     const valeurs = valeursDu(cle);
-    const action = bouton.dataset.action;
 
     if (action === 'basculer') {
       definirValeur(cle, h.id, !(valeurs[h.id] === true));
@@ -958,6 +961,14 @@
       emoji.textContent = h.emoji || '•';
       li.appendChild(emoji);
 
+      // Toute la zone nom + icône ouvre l'édition : cible tactile large,
+      // pour ne pas dépendre d'un appui précis sur le crayon.
+      const cible = document.createElement('button');
+      cible.type = 'button';
+      cible.className = 'gestion-cible';
+      cible.setAttribute('aria-label', 'Modifier ' + h.nom);
+      cible.appendChild(emoji);
+
       const nom = document.createElement('div');
       nom.className = 'gestion-nom';
       nom.textContent = h.nom;
@@ -966,14 +977,21 @@
         ? 'Objectif ' + fmt(h.cible) + ' ' + (h.unite || '')
         : 'À cocher') + (h.archivee ? ' · archivée' : '');
       nom.appendChild(petit);
-      li.appendChild(nom);
+      cible.appendChild(nom);
+
+      const chevron = document.createElement('span');
+      chevron.className = 'gestion-chevron';
+      chevron.setAttribute('aria-hidden', 'true');
+      chevron.textContent = '›';
+      cible.appendChild(chevron);
+
+      cible.addEventListener('click', () => ouvrirEditeur(h.id));
+      li.appendChild(cible);
 
       const haut = boutonMini('↑', 'Monter', index === 0, () => deplacer(index, -1));
       const bas = boutonMini('↓', 'Descendre', index === etat.habitudes.length - 1, () => deplacer(index, 1));
-      const modifier = boutonMini('✎', 'Modifier', false, () => ouvrirEditeur(h.id));
       li.appendChild(haut);
       li.appendChild(bas);
-      li.appendChild(modifier);
 
       liste.appendChild(li);
     });
@@ -1021,17 +1039,33 @@
   }
 
   function ouvrirEditeur(id) {
-    habitudeEditee = id || null;
-    retourGestion = !$('#modale-gestion').classList.contains('cachee');
-    if (retourGestion) $('#modale-gestion').classList.add('cachee');
     const creation = !id;
     const h = creation
       ? lireBrouillon()
       : etat.habitudes.find((x) => x.id === id);
 
-    if (!h) return;
+    // On ne touche à rien tant que l'habitude n'est pas retrouvée : la liste
+    // affichée ne doit jamais pouvoir désigner une entrée disparue.
+    if (!h) {
+      rendreGestion();
+      toast('Habitude introuvable, liste actualisée', 'erreur');
+      return;
+    }
 
-    $('#titre-habitude').textContent = creation ? 'Nouvelle habitude' : 'Modifier';
+    // Une saisie encore en attente appartient à l'habitude précédente :
+    // on la solde avant de changer de cible.
+    if (minuteurAutosave) {
+      clearTimeout(minuteurAutosave);
+      minuteurAutosave = null;
+      appliquerAutosave();
+    }
+
+    habitudeEditee = id || null;
+    retourGestion = !$('#modale-gestion').classList.contains('cachee');
+    if (retourGestion) $('#modale-gestion').classList.add('cachee');
+
+    // Le nom est repris dans le titre : on voit immédiatement ce qu'on édite.
+    $('#titre-habitude').textContent = creation ? 'Nouvelle habitude' : 'Modifier · ' + h.nom;
     $('#ch-nom').value = h.nom || '';
     $('#ch-emoji').value = h.emoji || '';
     $('#ch-cible').value = h.cible != null ? h.cible : 1;
@@ -1094,6 +1128,7 @@
   }
 
   function appliquerAutosave() {
+    minuteurAutosave = null;
     if (!habitudeEditee) return;
     const donnees = lireFormulaire();
     const champNom = $('#ch-nom');
@@ -1117,6 +1152,8 @@
     } else {
       delete h.cible; delete h.unite; delete h.pas;
     }
+
+    $('#titre-habitude').textContent = 'Modifier · ' + h.nom;
 
     if (sauver()) {
       majPill('enregistre');
