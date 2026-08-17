@@ -118,9 +118,10 @@ tools/generer-icones.js             régénère les PNG
 tools/construire-fichier-unique.js  régénère le fichier autonome
 ```
 
-Après toute modification de `index.html`, `styles.css` ou `app.js` :
-`node tools/construire-fichier-unique.js`, et incrémenter `CACHE` dans `sw.js`
-pour que les appareils déjà installés récupèrent la mise à jour.
+Après toute modification de `index.html`, `styles.css` ou `app.js` : incrémenter
+`VERSION` dans `app.js` (affichée dans les réglages) et `CACHE` dans `sw.js`, puis
+lancer `node tools/construire-fichier-unique.js`. Sans ces bumps, les appareils déjà
+installés continuent de servir leur copie locale.
 
 ### Thème clair / sombre
 

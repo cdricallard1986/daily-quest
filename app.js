@@ -7,6 +7,11 @@
 
   /* ─────────────── Constantes ─────────────── */
 
+  /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
+     version tourne réellement sur l'appareil. À incrémenter à chaque
+     déploiement, en même temps que CACHE dans sw.js. */
+  const VERSION = '2026.08.17-4';
+
   const CLE_STOCKAGE = 'dq.v1';
   const CLE_BROUILLON = 'dq.brouillon';
   const XP_PAR_NIVEAU = 50;
@@ -1282,6 +1287,7 @@
     $('#info-stockage').textContent = cles.length
       ? cles.length + ' jour(s) enregistré(s), depuis le ' + dateDe(cles[0]).toLocaleDateString('fr-FR') + '.'
       : 'Aucune donnée enregistrée pour le moment.';
+    $('#info-version').textContent = 'Version ' + VERSION;
     ouvrirModale('#modale-reglages');
   }
 
@@ -1456,7 +1462,19 @@
     }, 60000);
 
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
-      navigator.serviceWorker.register('sw.js').catch(() => { /* hors-ligne indisponible */ });
+      // L'app installée sert d'abord sa copie locale. Sans ce recharegement,
+      // il faut deux lancements pour voir une nouvelle version : le premier
+      // télécharge, le second affiche.
+      const avaitControleur = !!navigator.serviceWorker.controller;
+      let rechargeFaite = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!avaitControleur || rechargeFaite) return;
+        rechargeFaite = true;
+        location.reload();
+      });
+      navigator.serviceWorker.register('sw.js')
+        .then((enregistrement) => enregistrement.update())
+        .catch(() => { /* hors-ligne indisponible */ });
     }
   }
 

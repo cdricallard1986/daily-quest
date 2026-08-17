@@ -772,6 +772,8 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
 .toast.succes { border-color: var(--vert-texte); color: var(--vert-texte); }
 .toast.erreur { border-color: var(--rouge-texte); color: var(--rouge-texte); }
 
+.aide.version { text-align: right; opacity: 0.7; font-variant-numeric: tabular-nums; }
+
 </style>
 <script>
 /* Applique le thème choisi avant le premier rendu : sans ça, une app réglée
@@ -998,6 +1000,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     <input type="file" id="fichier-import" accept="application/json,.json" hidden>
     <button class="btn-danger pleine-largeur" id="btn-reinit" type="button">Tout réinitialiser</button>
     <p class="aide" id="info-stockage"></p>
+    <p class="aide version" id="info-version"></p>
   </div>
 </div>
 
@@ -1038,6 +1041,11 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
   'use strict';
 
   /* ─────────────── Constantes ─────────────── */
+
+  /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
+     version tourne réellement sur l'appareil. À incrémenter à chaque
+     déploiement, en même temps que CACHE dans sw.js. */
+  const VERSION = '2026.08.17-4';
 
   const CLE_STOCKAGE = 'dq.v1';
   const CLE_BROUILLON = 'dq.brouillon';
@@ -2314,6 +2322,7 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     $('#info-stockage').textContent = cles.length
       ? cles.length + ' jour(s) enregistré(s), depuis le ' + dateDe(cles[0]).toLocaleDateString('fr-FR') + '.'
       : 'Aucune donnée enregistrée pour le moment.';
+    $('#info-version').textContent = 'Version ' + VERSION;
     ouvrirModale('#modale-reglages');
   }
 
@@ -2488,7 +2497,19 @@ main { padding: 16px; max-width: 720px; margin: 0 auto; }
     }, 60000);
 
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
-      navigator.serviceWorker.register('sw.js').catch(() => { /* hors-ligne indisponible */ });
+      // L'app installée sert d'abord sa copie locale. Sans ce recharegement,
+      // il faut deux lancements pour voir une nouvelle version : le premier
+      // télécharge, le second affiche.
+      const avaitControleur = !!navigator.serviceWorker.controller;
+      let rechargeFaite = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!avaitControleur || rechargeFaite) return;
+        rechargeFaite = true;
+        location.reload();
+      });
+      navigator.serviceWorker.register('sw.js')
+        .then((enregistrement) => enregistrement.update())
+        .catch(() => { /* hors-ligne indisponible */ });
     }
   }
 
