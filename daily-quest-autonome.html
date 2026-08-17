@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-app="2026.08.17-7">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
@@ -1065,7 +1065,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.08.17-6';
+  const VERSION = '2026.08.17-7';
 
   const CLE_STOCKAGE = 'dq.v1';
   const CLE_BROUILLON = 'dq.brouillon';
@@ -2635,12 +2635,75 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 
   /* ─────────────── Démarrage ─────────────── */
 
+  /** Purge service workers et caches, puis recharge sur une URL neuve. */
+  function reparerEtRecharger() {
+    const purge = [];
+    if ('serviceWorker' in navigator) {
+      purge.push(navigator.serviceWorker.getRegistrations()
+        .then((liste) => Promise.all(liste.map((r) => r.unregister()))));
+    }
+    if (window.caches) {
+      purge.push(caches.keys().then((cles) => Promise.all(cles.map((c) => caches.delete(c)))));
+    }
+    Promise.all(purge)
+      .catch(() => { /* on recharge quoi qu'il arrive */ })
+      .then(() => location.replace(location.pathname + '?r=' + new Date().getTime()));
+  }
+
+  /**
+   * L'app installée peut se retrouver avec l'index.html d'une version et
+   * l'app.js d'une autre : le rendu échoue et l'écran reste vide. On compare
+   * l'estampille posée dans le HTML avec celle du script, et on répare.
+   * @returns {boolean} true si une réparation est lancée (ne pas démarrer).
+   */
+  function verifierCoherence() {
+    const attendue = document.documentElement.getAttribute('data-app');
+    if (!attendue || attendue === VERSION) return false;
+    // Une seule tentative par version, pour ne pas boucler indéfiniment.
+    try {
+      if (sessionStorage.getItem('dq.reparation') === VERSION) return false;
+      sessionStorage.setItem('dq.reparation', VERSION);
+    } catch (e) { /* navigation privée : on tente quand même */ }
+
+    console.warn('Versions incohérentes (page ' + attendue + ', script ' + VERSION + ')');
+    reparerEtRecharger();
+    return true;
+  }
+
+  /** Dernier filet : mieux vaut un message actionnable qu'un écran vide. */
+  function afficherPanne(erreur) {
+    console.error(erreur);
+    const zone = document.querySelector('main');
+    if (!zone) return;
+    zone.innerHTML = '';
+    const boite = document.createElement('div');
+    boite.className = 'vide-message';
+    boite.textContent = "L'application n'a pas pu démarrer. Tes données sont conservées.";
+    const bouton = document.createElement('button');
+    bouton.type = 'button';
+    bouton.className = 'btn-primaire pleine-largeur';
+    bouton.style.marginTop = '14px';
+    bouton.textContent = 'Réparer et recharger';
+    bouton.addEventListener('click', () => {
+      try { sessionStorage.removeItem('dq.reparation'); } catch (e) { /* sans effet */ }
+      reparerEtRecharger();
+    });
+    zone.appendChild(boite);
+    zone.appendChild(bouton);
+  }
+
   function demarrer() {
+    if (verifierCoherence()) return;
     etat = charger();
     sauver();
     appliquerTheme();
-    brancher();
-    rendreJour();
+    try {
+      brancher();
+      rendreJour();
+    } catch (e) {
+      afficherPanne(e);
+      return;
+    }
 
     // Si l'app reste ouverte au passage de minuit, on recale la date —
     // uniquement si l'utilisateur regardait bien la journée en cours.

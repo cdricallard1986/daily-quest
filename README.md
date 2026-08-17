@@ -126,10 +126,22 @@ tools/generer-icones.js             régénère les PNG
 tools/construire-fichier-unique.js  régénère le fichier autonome
 ```
 
-Après toute modification de `index.html`, `styles.css` ou `app.js` : incrémenter
-`VERSION` dans `app.js` (affichée dans les réglages) et `CACHE` dans `sw.js`, puis
-lancer `node tools/construire-fichier-unique.js`. Sans ces bumps, les appareils déjà
-installés continuent de servir leur copie locale.
+### Publier une modification
+
+Après toute modification de `index.html`, `styles.css` ou `app.js`, **trois valeurs
+doivent porter le même numéro**, sans quoi l'app installée reste sur son ancienne copie :
+
+1. `VERSION` dans `app.js` (affichée en bas des réglages) ;
+2. `data-app` sur la balise `<html>` d'`index.html` ;
+3. `CACHE` dans `sw.js`.
+
+Puis `node tools/construire-fichier-unique.js` pour régénérer le fichier autonome.
+
+Le service worker sert **une génération entière depuis un seul cache** : un `index.html`
+ne peut donc jamais être servi avec l'`app.js` d'une autre version — ce panachage laissait
+l'écran vide. Si une incohérence survient malgré tout, `verifierCoherence()` compare
+`data-app` à `VERSION` au démarrage, purge caches et service worker, et recharge une fois ;
+en dernier recours, un message avec un bouton « Réparer et recharger » remplace l'écran vide.
 
 ### Thème clair / sombre
 

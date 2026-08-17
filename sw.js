@@ -1,6 +1,11 @@
-/* Service worker : met l'app en cache pour un fonctionnement hors-ligne.
-   Bumper CACHE à chaque déploiement pour forcer la mise à jour. */
-const CACHE = 'daily-quest-v6';
+/* Service worker.
+   Stratégie « génération atomique » : chaque version place tous ses fichiers
+   dans un cache nommé et sert toujours depuis ce cache. Impossible d'obtenir
+   l'index.html d'une version avec l'app.js d'une autre — c'est ce panachage
+   qui laissait l'application vide.
+   Corollaire : CACHE doit être incrémenté à chaque déploiement, sans quoi
+   plus rien ne se met à jour. */
+const CACHE = 'daily-quest-v7';
 
 const FICHIERS = [
   './',
@@ -15,6 +20,8 @@ const FICHIERS = [
 ];
 
 self.addEventListener('install', (evt) => {
+  // Les fichiers sont téléchargés ensemble : si l'un échoue, la nouvelle
+  // génération n'est pas activée et l'ancienne, cohérente, continue de servir.
   evt.waitUntil(
     caches.open(CACHE)
       .then((c) => c.addAll(FICHIERS))
@@ -32,14 +39,13 @@ self.addEventListener('activate', (evt) => {
 
 self.addEventListener('fetch', (evt) => {
   if (evt.request.method !== 'GET') return;
+  if (new URL(evt.request.url).origin !== self.location.origin) return;
+
   evt.respondWith(
-    // Réseau d'abord (pour récupérer les mises à jour), cache en secours.
-    fetch(evt.request)
-      .then((reponse) => {
-        const copie = reponse.clone();
-        caches.open(CACHE).then((c) => c.put(evt.request, copie)).catch(() => {});
-        return reponse;
-      })
-      .catch(() => caches.match(evt.request).then((r) => r || caches.match('./index.html')))
+    caches.open(CACHE).then((cache) =>
+      // ignoreSearch : « index.html?v=3 » doit renvoyer la même génération.
+      cache.match(evt.request, { ignoreSearch: true })
+        .then((reponse) => reponse || fetch(evt.request))
+    )
   );
 });
