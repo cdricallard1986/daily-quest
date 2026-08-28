@@ -10,9 +10,11 @@
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.08.17-7';
+  const VERSION = '2026.08.28-8';
 
   const CLE_STOCKAGE = 'dq.v1';
+  /* v2 : abandon des quantités, chaque point se répond par oui ou par non. */
+  const VERSION_DONNEES = 2;
   const CLE_BROUILLON = 'dq.brouillon';
   const XP_PAR_NIVEAU = 50;
 
@@ -22,19 +24,22 @@
   const MOIS_COURTS = ['jan', 'fév', 'mar', 'avr', 'mai', 'juin',
     'juil', 'août', 'sep', 'oct', 'nov', 'déc'];
 
+  /* Chaque point se répond par oui ou par non : l'objectif chiffré, quand il
+     y en a un, fait partie de l'intitulé — c'est lui qui rend la réponse
+     évidente au moment de valider. */
   const HABITUDES_DEFAUT = [
-    { nom: "Pas d'alcool", emoji: '🚫', type: 'bool' },
-    { nom: 'Sommeil', emoji: '😴', type: 'quant', cible: 8, unite: 'h', pas: 0.5 },
-    { nom: 'Trouve un mentor', emoji: '🧭', type: 'bool' },
-    { nom: 'Exercice', emoji: '💪', type: 'bool' },
-    { nom: 'Marche', emoji: '👟', type: 'quant', cible: 10000, unite: 'pas', pas: 500 },
-    { nom: 'Rien à manger après 22 h', emoji: '🍽️', type: 'bool' },
-    { nom: 'Zéro aliment transformé', emoji: '🥦', type: 'bool' },
-    { nom: "Pas d'écrans après 21 h", emoji: '📵', type: 'bool' },
-    { nom: 'Loin des personnes toxiques', emoji: '🛡️', type: 'bool' },
-    { nom: 'Lecture', emoji: '📚', type: 'quant', cible: 30, unite: 'min', pas: 5 },
-    { nom: 'Eau', emoji: '💧', type: 'quant', cible: 3, unite: 'L', pas: 0.25 },
-    { nom: 'Méditation', emoji: '🧘', type: 'quant', cible: 10, unite: 'min', pas: 5 }
+    { nom: "Pas d'alcool", emoji: '🚫' },
+    { nom: 'Sommeil 8 h', emoji: '😴' },
+    { nom: 'Trouve un mentor', emoji: '🧭' },
+    { nom: 'Exercice', emoji: '💪' },
+    { nom: 'Marche 10 000 pas', emoji: '👟' },
+    { nom: 'Rien à manger après 22 h', emoji: '🍽️' },
+    { nom: 'Zéro aliment transformé', emoji: '🥦' },
+    { nom: "Pas d'écrans après 21 h", emoji: '📵' },
+    { nom: 'Loin des personnes toxiques', emoji: '🛡️' },
+    { nom: 'Lecture 30 min', emoji: '📚' },
+    { nom: 'Eau 3 L', emoji: '💧' },
+    { nom: 'Méditation 10 min', emoji: '🧘' }
   ];
 
   /* ─────────────── Utilitaires de date ─────────────── */
@@ -94,9 +99,10 @@
 
   function etatParDefaut() {
     return {
-      version: 1,
+      version: VERSION_DONNEES,
       habitudes: HABITUDES_DEFAUT.map((h, i) => Object.assign({
         id: 'h' + (i + 1),
+        type: 'bool',
         archivee: false
       }, h)),
       jours: {},
@@ -112,11 +118,49 @@
       if (!donnees || !Array.isArray(donnees.habitudes)) return etatParDefaut();
       donnees.jours = donnees.jours || {};
       donnees.reglages = Object.assign({ objectif: 80, theme: 'auto' }, donnees.reglages);
-      return donnees;
+      return migrer(donnees);
     } catch (e) {
       console.error('Lecture du stockage impossible', e);
       return etatParDefaut();
     }
+  }
+
+  /**
+   * Amène une sauvegarde ancienne au format courant.
+   * v1 → v2 : les habitudes « quantité » deviennent des oui / non. L'objectif
+   * chiffré rejoint l'intitulé (« Eau » → « Eau 3 L ») et chaque valeur passée
+   * est relue avec la règle d'alors : objectif atteint = oui, sinon non.
+   */
+  function migrer(donnees) {
+    if (Number(donnees.version) >= VERSION_DONNEES) return donnees;
+
+    const cibles = {};
+    donnees.habitudes.forEach((h) => {
+      if (h.type !== 'quant') { h.type = 'bool'; return; }
+      cibles[h.id] = h.cible > 0 ? h.cible : 0;
+      const suffixe = (h.cible != null ? fmt(h.cible) : '') + (h.unite ? ' ' + h.unite : '');
+      if (suffixe.trim() && h.nom && h.nom.indexOf(suffixe.trim()) === -1) {
+        h.nom = (h.nom + ' ' + suffixe.trim()).slice(0, 60);
+      }
+      h.type = 'bool';
+      delete h.cible; delete h.unite; delete h.pas;
+    });
+
+    Object.keys(donnees.jours).forEach((cle) => {
+      const jour = donnees.jours[cle];
+      Object.keys(jour).forEach((id) => {
+        const v = jour[id];
+        if (typeof v === 'number') {
+          const cible = cibles[id] || 0;
+          jour[id] = cible > 0 ? v >= cible : v > 0;
+        } else {
+          jour[id] = v === true;
+        }
+      });
+    });
+
+    donnees.version = VERSION_DONNEES;
+    return donnees;
   }
 
   function sauver() {
@@ -144,33 +188,35 @@
     return etat.jours[cle] || {};
   }
 
-  function valeurBrute(h, valeurs) {
+  /**
+   * Réponse enregistrée pour une habitude : true (oui), false (non) ou
+   * null (pas encore répondu). Ce troisième état est ce qui distingue
+   * « j'ai raté » de « j'ai oublié de remplir ».
+   */
+  function reponse(h, valeurs) {
     const v = valeurs[h.id];
-    if (h.type === 'quant') return typeof v === 'number' ? v : 0;
-    return v === true;
+    return v === true ? true : v === false ? false : null;
   }
 
   function estFaite(h, valeurs) {
-    if (h.type === 'quant') {
-      const cible = h.cible || 0;
-      const valeur = valeurBrute(h, valeurs);
-      return cible > 0 ? valeur >= cible : valeur > 0;
-    }
     return valeurs[h.id] === true;
   }
 
-  function progression(h, valeurs) {
-    if (h.type !== 'quant') return estFaite(h, valeurs) ? 1 : 0;
-    const cible = h.cible || 0;
-    if (cible <= 0) return valeurBrute(h, valeurs) > 0 ? 1 : 0;
-    return Math.min(1, valeurBrute(h, valeurs) / cible);
+  function estRepondue(h, valeurs) {
+    return reponse(h, valeurs) !== null;
   }
 
-  /** Le jour contient-il au moins une donnée saisie ? */
+  /** Habitudes encore sans réponse sur ce jour. */
+  function enAttente(cle, habitudes) {
+    const valeurs = valeursDu(cle);
+    return (habitudes || habitudesActives()).filter((h) => !estRepondue(h, valeurs));
+  }
+
+  /** Le jour contient-il au moins une réponse ? */
   function jourRenseigne(cle) {
     const v = etat.jours[cle];
     if (!v) return false;
-    return Object.keys(v).some((k) => v[k] === true || (typeof v[k] === 'number' && v[k] > 0));
+    return Object.keys(v).some((k) => v[k] === true || v[k] === false);
   }
 
   function scoreJour(cle, habitudes) {
@@ -242,16 +288,16 @@
 
     const parHabitude = habs.map((h) => {
       let reussis = 0;
-      let somme = 0;
+      let rates = 0;
       cles.forEach((c) => {
         const valeurs = valeursDu(c);
         if (estFaite(h, valeurs)) reussis++;
-        if (h.type === 'quant') somme += valeurBrute(h, valeurs);
+        else if (estRepondue(h, valeurs)) rates++;
       });
       return {
         habitude: h,
         reussis: reussis,
-        somme: somme,
+        rates: rates,
         base: suivis.length || cles.length,
         pct: (suivis.length || cles.length) ? reussis / (suivis.length || cles.length) : 0
       };
@@ -269,16 +315,45 @@
 
   /* ─────────────── Écriture des valeurs ─────────────── */
 
+  /**
+   * Enregistre une réponse. `true` et `false` sont deux réponses distinctes
+   * et toutes deux stockées ; seul `null` efface la réponse et remet
+   * l'habitude en attente.
+   */
   function definirValeur(cle, habitudeId, valeur) {
     const jour = etat.jours[cle] ? Object.assign({}, etat.jours[cle]) : {};
-    if (valeur === false || valeur === 0 || valeur === null || valeur === undefined) {
-      delete jour[habitudeId];
-    } else {
-      jour[habitudeId] = valeur;
-    }
+    if (valeur === null || valeur === undefined) delete jour[habitudeId];
+    else jour[habitudeId] = valeur === true;
     if (Object.keys(jour).length === 0) delete etat.jours[cle];
     else etat.jours[cle] = jour;
     sauver();
+  }
+
+  /**
+   * Clôture les journées écoulées : ce qui n'a pas été répondu passe à « non ».
+   * Une journée jamais ouverte reste vierge — elle est « non suivie », pas
+   * ratée, et ne pénalise donc ni la moyenne ni la série.
+   * @returns {boolean} true si quelque chose a changé.
+   */
+  function cloturerJoursPasses() {
+    const habs = habitudesActives();
+    if (!habs.length) return false;
+    const auj = cleDe(aujourdHui());
+    let modifie = false;
+
+    Object.keys(etat.jours).forEach((cle) => {
+      if (cle >= auj) return;              // clés ISO : la comparaison texte suffit
+      if (!jourRenseigne(cle)) return;     // journée jamais commencée : on n'y touche pas
+      const jour = etat.jours[cle];
+      habs.forEach((h) => {
+        if (jour[h.id] === true || jour[h.id] === false) return;
+        jour[h.id] = false;
+        modifie = true;
+      });
+    });
+
+    if (modifie) sauver();
+    return modifie;
   }
 
   /* ─────────────── Thème clair / sombre ─────────────── */
@@ -372,6 +447,9 @@
     $('#barre-xp').style.width = (dansNiveau / XP_PAR_NIVEAU * 100) + '%';
     $('#xp-texte').textContent = dansNiveau + ' / ' + XP_PAR_NIVEAU + ' XP → niv. ' + (niveau + 1);
 
+    // Rappel des points non répondus
+    rendreRappel(cle, habs);
+
     // Liste des habitudes
     const liste = $('#liste-habitudes');
     liste.innerHTML = '';
@@ -385,9 +463,10 @@
     }
 
     habs.forEach((h) => {
-      const fait = estFaite(h, valeurs);
+      const rep = reponse(h, valeurs);
       const li = document.createElement('li');
-      li.className = 'habitude' + (fait ? ' faite' : '');
+      li.className = 'habitude' +
+        (rep === true ? ' faite' : rep === false ? ' ratee' : ' attente');
       li.dataset.id = h.id;
 
       const emoji = document.createElement('div');
@@ -395,63 +474,50 @@
       emoji.textContent = h.emoji || '•';
       li.appendChild(emoji);
 
-      // Une seule ligne par habitude : l'objectif est intégré à la valeur
-      // (« 2,5/3 L ») et la progression passe en filet sous la carte, pour
-      // que les douze points tiennent sans défilement.
       const nom = document.createElement('div');
       nom.className = 'hab-nom';
       nom.textContent = h.nom;
       li.appendChild(nom);
 
-      if (h.type === 'quant') {
-        const zone = document.createElement('div');
-        zone.className = 'hab-quant';
-
-        const moins = document.createElement('button');
-        moins.className = 'btn-pas';
-        moins.type = 'button';
-        moins.dataset.action = 'moins';
-        moins.setAttribute('aria-label', 'Retirer');
-        moins.textContent = '−';
-
-        const val = document.createElement('button');
-        val.className = 'hab-valeur';
-        val.type = 'button';
-        val.dataset.action = 'saisir';
-        val.textContent = fmt(valeurBrute(h, valeurs)) + '/' + fmt(h.cible) +
-          (h.unite ? ' ' + h.unite : '');
-
-        const plus = document.createElement('button');
-        plus.className = 'btn-pas';
-        plus.type = 'button';
-        plus.dataset.action = 'plus';
-        plus.setAttribute('aria-label', 'Ajouter');
-        plus.textContent = '+';
-
-        zone.appendChild(moins);
-        zone.appendChild(val);
-        zone.appendChild(plus);
-        li.appendChild(zone);
-
-        const filet = document.createElement('i');
-        filet.className = 'hab-filet';
-        filet.style.width = (progression(h, valeurs) * 100) + '%';
-        li.appendChild(filet);
-      } else {
-        const coche = document.createElement('button');
-        coche.className = 'hab-coche';
-        coche.type = 'button';
-        coche.dataset.action = 'basculer';
-        coche.setAttribute('aria-label', (fait ? 'Décocher ' : 'Cocher ') + h.nom);
-        coche.setAttribute('aria-pressed', String(fait));
-        coche.textContent = '✓';
-        li.appendChild(coche);
-      }
+      // Oui et non côte à côte : répondre « non » est un geste aussi
+      // explicite que répondre « oui », c'est ce qui évite les oublis.
+      const zone = document.createElement('div');
+      zone.className = 'hab-reponse';
+      zone.setAttribute('role', 'group');
+      zone.setAttribute('aria-label', h.nom);
+      zone.appendChild(boutonReponse(h, 'oui', rep === true));
+      zone.appendChild(boutonReponse(h, 'non', rep === false));
+      li.appendChild(zone);
 
       liste.appendChild(li);
     });
 
     ajusterDensite();
+  }
+
+  function boutonReponse(h, action, actif) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'hab-btn hab-' + action + (actif ? ' actif' : '');
+    b.dataset.action = action;
+    b.setAttribute('aria-pressed', String(actif));
+    b.setAttribute('aria-label', (action === 'oui' ? 'Oui — ' : 'Non — ') + h.nom);
+    b.textContent = action === 'oui' ? '✓' : '✕';
+    return b;
+  }
+
+  /**
+   * Rappel des habitudes encore sans réponse. Affiché uniquement sur une
+   * journée qui n'est pas encore close : ailleurs, tout est déjà tranché.
+   */
+  function rendreRappel(cle, habs) {
+    const boite = $('#rappel-attente');
+    const reste = enAttente(cle, habs).length;
+    const passe = cle < cleDe(aujourdHui());
+    boite.classList.toggle('cachee', reste === 0 || passe);
+    if (reste === 0 || passe) return;
+    boite.textContent = reste + (reste > 1 ? ' points sans réponse' : ' point sans réponse') +
+      ' — ils passeront à « non » à la fin de la journée.';
   }
 
   /**
@@ -481,52 +547,20 @@
     const h = etat.habitudes.find((x) => x.id === li.dataset.id);
     if (!h) return;
 
-    // Sur une habitude à cocher, toute la ligne bascule l'état : cible large,
-    // plus sûre au doigt qu'une pastille de 30 px.
+    // Un appui hors des deux boutons vaut « oui » : c'est la réponse la plus
+    // fréquente, et la ligne entière est une cible plus sûre au doigt.
     const bouton = evt.target.closest('[data-action]');
-    const action = bouton ? bouton.dataset.action : (h.type === 'bool' ? 'basculer' : null);
-    if (!action) return;
+    const action = bouton ? bouton.dataset.action : 'oui';
+    if (action !== 'oui' && action !== 'non') return;
 
     const cle = cleDe(jourCourant);
     const valeurs = valeursDu(cle);
+    const actuelle = reponse(h, valeurs);
+    const voulue = action === 'oui';
 
-    if (action === 'basculer') {
-      definirValeur(cle, h.id, !(valeurs[h.id] === true));
-    } else if (action === 'plus' || action === 'moins') {
-      const pas = h.pas > 0 ? h.pas : 1;
-      const delta = action === 'plus' ? pas : -pas;
-      const brut = valeurBrute(h, valeurs) + delta;
-      const arrondi = Math.max(0, Math.round(brut * 1000) / 1000);
-      definirValeur(cle, h.id, arrondi);
-    } else if (action === 'saisir') {
-      ouvrirSaisieQuantite(h, valeurBrute(h, valeurs));
-      return;
-    }
-    rendreJour();
-  }
-
-  /* ─────────────── Saisie manuelle d'une quantité ─────────────── */
-
-  let habitudeEnSaisie = null;
-
-  function ouvrirSaisieQuantite(h, valeur) {
-    habitudeEnSaisie = h;
-    $('#quantite-titre').textContent = h.nom;
-    $('#quantite-lib').textContent = 'Valeur en ' + (h.unite || 'unités') +
-      ' (objectif ' + fmt(h.cible) + ')';
-    const champ = $('#ch-quantite');
-    champ.value = valeur || '';
-    ouvrirModale('#modale-quantite');
-    setTimeout(() => { champ.focus(); champ.select(); }, 80);
-  }
-
-  function validerSaisieQuantite() {
-    if (!habitudeEnSaisie) return;
-    const brut = parseFloat(String($('#ch-quantite').value).replace(',', '.'));
-    const valeur = isFinite(brut) && brut > 0 ? Math.round(brut * 1000) / 1000 : 0;
-    definirValeur(cleDe(jourCourant), habitudeEnSaisie.id, valeur);
-    habitudeEnSaisie = null;
-    fermerModales();
+    // Réappuyer sur la réponse déjà donnée l'annule : on peut corriger
+    // une erreur sans avoir à répondre l'inverse.
+    definirValeur(cle, h.id, actuelle === voulue ? null : voulue);
     rendreJour();
   }
 
@@ -654,17 +688,18 @@
         const valeurs = valeursDu(c);
         const cellule = document.createElement('td');
         const p = document.createElement('div');
-        const prog = progression(h, valeurs);
-        if (estFaite(h, valeurs)) {
+        const rep = reponse(h, valeurs);
+        if (rep === true) {
           p.className = 'pastille ok';
           p.textContent = '✓';
-          p.title = h.nom + ' — validé';
-        } else if (prog > 0) {
-          p.className = 'pastille partiel';
-          p.textContent = Math.round(prog * 100) + '%';
-          p.title = h.nom + ' — ' + Math.round(prog * 100) + ' %';
+          p.title = h.nom + ' — oui';
+        } else if (rep === false) {
+          p.className = 'pastille non';
+          p.textContent = '✕';
+          p.title = h.nom + ' — non';
         } else {
           p.className = 'pastille';
+          p.title = h.nom + ' — sans réponse';
         }
         cellule.appendChild(p);
         tr.appendChild(cellule);
@@ -906,9 +941,7 @@
       nom.textContent = h.nom;
       const chiffre = document.createElement('span');
       chiffre.className = 'detail-chiffre';
-      chiffre.textContent = h.type === 'quant'
-        ? fmt(d.somme) + ' ' + (h.unite || '')
-        : d.reussis + ' j';
+      chiffre.textContent = d.reussis + ' j';
       haut.appendChild(nom);
       haut.appendChild(chiffre);
       corps.appendChild(haut);
@@ -916,14 +949,8 @@
       const sous = document.createElement('div');
       sous.className = 'detail-sous';
       const base = donnees.suivis || 0;
-      if (h.type === 'quant') {
-        const moyenne = base ? d.somme / base : 0;
-        sous.textContent = 'Objectif atteint ' + d.reussis + '/' + base + ' j · ' +
-          fmt(Math.round(moyenne * 100) / 100) + ' ' + (h.unite || '') + '/j en moyenne';
-      } else {
-        sous.textContent = 'Validé ' + d.reussis + '/' + base + ' j · ' +
-          Math.round(d.pct * 100) + ' %';
-      }
+      sous.textContent = 'Oui ' + d.reussis + ' j · non ' + d.rates + ' j · ' +
+        Math.round(d.pct * 100) + ' % sur ' + base + ' j suivis';
       corps.appendChild(sous);
 
       const jauge = document.createElement('div');
@@ -1051,9 +1078,7 @@
       nom.className = 'gestion-nom';
       nom.textContent = h.nom;
       const petit = document.createElement('small');
-      petit.textContent = (h.type === 'quant'
-        ? 'Objectif ' + fmt(h.cible) + ' ' + (h.unite || '')
-        : 'À cocher') + (h.archivee ? ' · archivée' : '');
+      petit.textContent = h.archivee ? 'Archivée' : 'Validation oui / non';
       nom.appendChild(petit);
       cible.appendChild(nom);
 
@@ -1235,10 +1260,6 @@
     $('#titre-habitude').textContent = creation ? 'Nouvelle habitude' : 'Modifier · ' + h.nom;
     $('#ch-nom').value = h.nom || '';
     $('#ch-emoji').value = h.emoji || '';
-    $('#ch-cible').value = h.cible != null ? h.cible : 1;
-    $('#ch-unite').value = h.unite || '';
-    $('#ch-pas').value = h.pas != null ? h.pas : 1;
-    majTypeUI(h.type || 'bool');
 
     $('#btn-creer').classList.toggle('cachee', !creation);
     $('#actions-edition').classList.toggle('cachee', creation);
@@ -1247,27 +1268,11 @@
     ouvrirModale('#modale-habitude');
   }
 
-  function majTypeUI(type) {
-    $$('#ch-type .choix-btn').forEach((b) => b.classList.toggle('actif', b.dataset.type === type));
-    $('#bloc-quant').classList.toggle('cachee', type !== 'quant');
-  }
-
-  function typeChoisi() {
-    const actif = $('#ch-type .choix-btn.actif');
-    return actif ? actif.dataset.type : 'bool';
-  }
-
   function lireFormulaire() {
-    const type = typeChoisi();
-    const cible = parseFloat(String($('#ch-cible').value).replace(',', '.'));
-    const pas = parseFloat(String($('#ch-pas').value).replace(',', '.'));
     return {
       nom: $('#ch-nom').value.trim(),
       emoji: $('#ch-emoji').value.trim(),
-      type: type,
-      cible: type === 'quant' ? (isFinite(cible) && cible > 0 ? cible : 1) : undefined,
-      unite: type === 'quant' ? $('#ch-unite').value.trim() : undefined,
-      pas: type === 'quant' ? (isFinite(pas) && pas > 0 ? pas : 1) : undefined
+      type: 'bool'
     };
   }
 
@@ -1311,14 +1316,7 @@
     if (!h) return;
     h.nom = donnees.nom;
     h.emoji = donnees.emoji;
-    h.type = donnees.type;
-    if (donnees.type === 'quant') {
-      h.cible = donnees.cible;
-      h.unite = donnees.unite;
-      h.pas = donnees.pas;
-    } else {
-      delete h.cible; delete h.unite; delete h.pas;
-    }
+    h.type = 'bool';
 
     $('#titre-habitude').textContent = 'Modifier · ' + h.nom;
 
@@ -1390,7 +1388,7 @@
       const brut = localStorage.getItem(CLE_BROUILLON);
       if (brut) return JSON.parse(brut);
     } catch (e) { /* brouillon illisible : on repart à neuf */ }
-    return { nom: '', emoji: '', type: 'bool', cible: 1, unite: '', pas: 1 };
+    return { nom: '', emoji: '', type: 'bool' };
   }
   function ecrireBrouillon(donnees) {
     try { localStorage.setItem(CLE_BROUILLON, JSON.stringify(donnees)); } catch (e) { /* ignoré */ }
@@ -1442,9 +1440,10 @@
         if (!donnees || !Array.isArray(donnees.habitudes)) throw new Error('format');
         confirmer('Remplacer toutes les données actuelles par cette sauvegarde ?', [{
           libelle: 'Importer', classe: 'btn-primaire', action: () => {
-            etat = donnees;
-            etat.jours = etat.jours || {};
-            etat.reglages = Object.assign({ objectif: 80, theme: 'auto' }, etat.reglages);
+            donnees.jours = donnees.jours || {};
+            donnees.reglages = Object.assign({ objectif: 80, theme: 'auto' }, donnees.reglages);
+            etat = migrer(donnees);
+            cloturerJoursPasses();
             sauver();
             appliquerTheme();
             rendreJour();
@@ -1517,18 +1516,8 @@
     $('#btn-termine').addEventListener('click', fermerAvecFlush);
 
     // Éditeur : auto-enregistrement
-    ['#ch-nom', '#ch-emoji', '#ch-cible', '#ch-unite', '#ch-pas'].forEach((sel) => {
+    ['#ch-nom', '#ch-emoji'].forEach((sel) => {
       $(sel).addEventListener('input', planifierAutosave);
-    });
-    $$('#ch-type .choix-btn').forEach((b) => b.addEventListener('click', () => {
-      majTypeUI(b.dataset.type);
-      planifierAutosave();
-    }));
-
-    // Quantité
-    $('#btn-valider-quantite').addEventListener('click', validerSaisieQuantite);
-    $('#ch-quantite').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') validerSaisieQuantite();
     });
 
     // Réglages
@@ -1640,6 +1629,7 @@
   function demarrer() {
     if (verifierCoherence()) return;
     etat = charger();
+    cloturerJoursPasses();
     sauver();
     appliquerTheme();
     try {
@@ -1655,6 +1645,9 @@
     setInterval(() => {
       if (vueActive !== 'jour' || !suivaitAujourdHui) return;
       if (!memeJour(jourCourant, aujourdHui())) {
+        // Passage de minuit : la journée écoulée se ferme, ce qui n'a pas
+        // été répondu passe à « non ».
+        cloturerJoursPasses();
         jourCourant = aujourdHui();
         rendreJour();
       }

@@ -34,6 +34,8 @@
   --rouge-texte: #b91c1c;
   --rouge-doux: rgba(220, 38, 38, 0.1);
   --rouge-bord: rgba(220, 38, 38, 0.3);
+  --rouge-rgb: 220, 38, 38;
+  --sur-rouge: #ffffff;
 
   --fond-flou: rgba(244, 246, 249, 0.88);
   --voile-fond: rgba(15, 23, 42, 0.42);
@@ -78,6 +80,8 @@
     --rouge-texte: #f87171;
     --rouge-doux: rgba(248, 113, 113, 0.12);
     --rouge-bord: rgba(248, 113, 113, 0.35);
+    --rouge-rgb: 248, 113, 113;
+    --sur-rouge: #2a0707;
 
     --fond-flou: rgba(11, 14, 20, 0.88);
     --voile-fond: rgba(0, 0, 0, 0.62);
@@ -113,6 +117,8 @@
   --rouge-texte: #f87171;
   --rouge-doux: rgba(248, 113, 113, 0.12);
   --rouge-bord: rgba(248, 113, 113, 0.35);
+  --rouge-rgb: 248, 113, 113;
+  --sur-rouge: #2a0707;
 
   --fond-flou: rgba(11, 14, 20, 0.88);
   --voile-fond: rgba(0, 0, 0, 0.62);
@@ -321,6 +327,9 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   transition: border-color 0.2s, background 0.2s;
 }
 .habitude.faite { border-color: rgba(var(--vert-rgb), 0.45); background: linear-gradient(90deg, var(--vert-doux), var(--surface) 60%); }
+.habitude.ratee { border-color: var(--rouge-bord); background: linear-gradient(90deg, var(--rouge-doux), var(--surface) 60%); }
+/* Sans réponse : bordure marquée, la ligne se voit de loin dans la liste. */
+.habitude.attente { border-style: dashed; border-color: var(--or-bord); }
 
 .hab-emoji {
   width: calc(var(--h-ligne, 52px) - 14px);
@@ -335,6 +344,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   background: var(--surface-2);
 }
 .habitude.faite .hab-emoji { background: var(--vert-doux); }
+.habitude.ratee .hab-emoji { background: var(--rouge-doux); }
 
 .hab-nom {
   flex: 1;
@@ -347,59 +357,41 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   text-overflow: ellipsis;
 }
 .habitude.faite .hab-nom { color: var(--vert-texte); }
+.habitude.ratee .hab-nom { color: var(--rouge-texte); }
 
-/* Filet de progression collé au bas de la ligne : informe sans coûter
-   de hauteur. */
-.hab-filet {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 3px;
-  background: var(--or);
-  border-radius: 0 3px 0 0;
-  transition: width 0.3s;
-}
-.habitude.faite .hab-filet { background: var(--vert); }
-
-.hab-quant { display: flex; align-items: center; gap: 5px; flex: none; }
-.btn-pas {
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  background: var(--surface-2);
-  border: 1px solid var(--bordure);
-  font-size: 17px;
-  line-height: 1;
-  display: grid;
-  place-items: center;
-  color: var(--texte-doux);
-}
-.btn-pas:active { background: var(--bordure); }
-.hab-valeur {
-  min-width: 58px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  font-weight: 650;
-  font-size: 12.5px;
-  padding: 4px 2px;
-  border-radius: 8px;
-  color: var(--texte-doux);
-}
-.habitude.faite .hab-valeur { color: var(--vert-texte); }
-
-.hab-coche {
-  width: 30px;
-  height: 30px;
+/* Oui et non côte à côte. Tant qu'aucun des deux n'est actif, les deux
+   restent gris : l'absence de réponse se lit d'un coup d'œil. */
+.hab-reponse { display: flex; align-items: center; gap: 6px; flex: none; }
+.hab-btn {
+  width: 32px;
+  height: 32px;
   flex: none;
   border-radius: 50%;
   border: 2px solid var(--bordure);
+  background: var(--surface-2);
   display: grid;
   place-items: center;
-  font-size: 15px;
-  color: transparent;
-  transition: all 0.18s;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--texte-faible);
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
 }
-.habitude.faite .hab-coche { background: var(--vert); border-color: var(--vert); color: var(--sur-vert); }
+.hab-btn:active { transform: scale(0.94); }
+.hab-oui.actif { background: var(--vert); border-color: var(--vert); color: var(--sur-vert); }
+.hab-non.actif { background: var(--rouge); border-color: var(--rouge); color: var(--sur-rouge); }
+
+/* Rappel des points encore sans réponse. */
+.rappel {
+  margin: 0 0 8px;
+  padding: 7px 11px;
+  border-radius: var(--rayon-s);
+  background: var(--or-doux);
+  border: 1px solid var(--or-bord);
+  color: var(--or-texte);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.35;
+}
 
 /* ─────────── Boutons ─────────── */
 .btn-primaire, .btn-secondaire, .btn-danger, .btn-succes {
@@ -522,7 +514,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   color: var(--vert-texte);
 }
 .pastille.ok { background: var(--vert); border-color: var(--vert-texte); color: var(--sur-vert); }
-.pastille.partiel { background: var(--or-doux); border-color: var(--or-bord); color: var(--or-texte); font-size: 9px; font-weight: 700; }
+.pastille.non { background: var(--rouge-doux); border-color: var(--rouge-bord); color: var(--rouge-texte); font-weight: 700; }
 .ligne-total td { padding-top: 8px !important; }
 .total-jour {
   font-size: 11px;
@@ -691,7 +683,6 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 
 .champ { display: block; margin-bottom: 14px; }
 .champ > span { display: block; font-size: 12.5px; color: var(--texte-doux); margin-bottom: 6px; }
-.ligne-champs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .ligne-slider { display: flex; align-items: center; gap: 12px; }
 .ligne-slider input[type="range"] { flex: 1; accent-color: var(--or-texte); }
 .ligne-slider output { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 48px; text-align: right; }

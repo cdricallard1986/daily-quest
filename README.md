@@ -18,11 +18,17 @@ hors-ligne.
 - Un anneau de progression (`8 / 12`, `67 %`) et trois indicateurs de jeu :
   **série** (🔥 jours consécutifs au-dessus de l'objectif), **record** (meilleure série
   historique) et **niveau** (1 XP par point validé, un niveau tous les 50 XP).
-- Deux types de points :
-  - **à cocher** — une pastille, on tape dessus (ex. « Pas d'alcool ») ;
-  - **quantité** — un compteur `− / +` avec un objectif chiffré (ex. `10 000 pas`,
-    `3 L`, `30 min`) affiché en `2,5/3 L`. Un appui sur la valeur permet de saisir un
-    chiffre exact ; un filet en bas de ligne montre la progression partielle.
+- **Un seul type de point : oui ou non.** Chaque ligne porte deux boutons, `✓` et `✕` ;
+  un appui ailleurs sur la ligne vaut `✓`. Réappuyer sur la réponse déjà donnée
+  l'annule et remet le point en attente. Un objectif chiffré se met simplement dans
+  l'intitulé (« Eau 3 L », « Marche 10 000 pas »).
+- Trois états, donc, et non deux : **oui** (ligne verte), **non** (ligne rouge) et
+  **sans réponse** (bordure pointillée). Un bandeau au-dessus de la liste compte les
+  points encore en attente.
+- **À la fin de la journée, ce qui n'a pas été répondu passe à « non ».** La clôture
+  a lieu au passage de minuit si l'app est ouverte, sinon au lancement suivant.
+  Une journée jamais ouverte n'est pas clôturée : elle reste « non suivie » et ne
+  pénalise ni la moyenne ni la série.
 - Les lignes sont **compactées automatiquement** pour que toutes les habitudes tiennent
   à l'écran sans défilement (voir `ajusterDensite`), jusqu'à un plancher de 34 px.
 - **Gérer mes habitudes** se trouve dans les réglages ⚙ : ajouter, renommer, archiver
@@ -36,13 +42,13 @@ Trois modes, avec navigation vers les périodes passées :
 
 | Mode | Affichage |
 |---|---|
-| **Semaine** | Grille habitudes × 7 jours : `✓` validé, `%` partiel, vide non fait, plus le total par jour. |
+| **Semaine** | Grille habitudes × 7 jours : `✓` oui, `✕` non, case vide sans réponse, plus le total par jour. |
 | **Mois** | Calendrier coloré par taux de réussite ; un appui sur un jour l'ouvre dans l'onglet Aujourd'hui. |
 | **Année** | Carte de chaleur des 365 jours (défilement horizontal) + moyenne par mois. |
 
 Chaque mode affiche en dessous un **résumé** (moyenne, jours à 100 %, jours suivis, points
-validés) et le **détail par habitude** : nombre de jours validés, et pour les quantités le
-**cumul** de la période et la **moyenne par jour** (ex. `1 144 064 pas` · `8 800 pas/j`).
+validés) et le **détail par habitude** : jours répondus **oui**, jours répondus **non**,
+et le pourcentage de réussite sur les jours suivis.
 
 ---
 
@@ -50,20 +56,22 @@ validés) et le **détail par habitude** : nombre de jours validés, et pour les
 
 Repris de la liste de départ, ajustés pour un suivi quotidien :
 
-| | Point | Type |
-|---|---|---|
-| 🚫 | Pas d'alcool | à cocher |
-| 😴 | Sommeil | 8 h |
-| 🧭 | Trouve un mentor | à cocher |
-| 💪 | Exercice | à cocher |
-| 👟 | Marche | 10 000 pas |
-| 🍽️ | Rien à manger après 22 h | à cocher |
-| 🥦 | Zéro aliment transformé | à cocher |
-| 📵 | Pas d'écrans après 21 h | à cocher |
-| 🛡️ | Loin des personnes toxiques | à cocher |
-| 📚 | Lecture | 30 min |
-| 💧 | Eau | 3 L |
-| 🧘 | Méditation | 10 min |
+Tous se répondent par oui ou par non ; les objectifs chiffrés font partie de l'intitulé.
+
+| | Point |
+|---|---|
+| 🚫 | Pas d'alcool |
+| 😴 | Sommeil 8 h |
+| 🧭 | Trouve un mentor |
+| 💪 | Exercice |
+| 👟 | Marche 10 000 pas |
+| 🍽️ | Rien à manger après 22 h |
+| 🥦 | Zéro aliment transformé |
+| 📵 | Pas d'écrans après 21 h |
+| 🛡️ | Loin des personnes toxiques |
+| 📚 | Lecture 30 min |
+| 💧 | Eau 3 L |
+| 🧘 | Méditation 10 min |
 
 Tout est modifiable depuis l'app : le nombre de points n'est pas limité à 12.
 
@@ -161,21 +169,26 @@ lancement en mode sombre.
 
 ```jsonc
 {
-  "version": 1,
+  "version": 2,
   "habitudes": [
     { "id": "h1", "nom": "Pas d'alcool", "emoji": "🚫", "type": "bool", "archivee": false },
-    { "id": "h11", "nom": "Eau", "emoji": "💧", "type": "quant",
-      "cible": 3, "unite": "L", "pas": 0.25, "archivee": false }
+    { "id": "h11", "nom": "Eau 3 L", "emoji": "💧", "type": "bool", "archivee": false }
   ],
   "jours": {
-    "2026-08-17": { "h1": true, "h11": 2.5 }   // booléen ou nombre selon le type
+    // true = oui, false = non, clé absente = pas encore répondu
+    "2026-08-17": { "h1": true, "h11": false }
   },
   "reglages": { "objectif": 80, "theme": "auto" } // % pour la série, apparence
 }
 ```
 
 Une journée absente de `jours` est considérée comme **non suivie** (grise dans l'historique),
-et non comme un échec — elle ne pénalise pas les moyennes.
+et non comme un échec — elle ne pénalise pas les moyennes. Dès qu'une réponse y est
+enregistrée, la journée est suivie : à sa clôture, les points restants passent à `false`.
+
+Les sauvegardes en `version: 1` (habitudes de type `quant`) sont migrées au chargement
+comme à l'import : l'objectif chiffré rejoint l'intitulé et chaque valeur passée est relue
+avec la règle d'alors — objectif atteint = `true`, sinon `false`.
 
 Archiver une habitude la retire de la journée en cours **en conservant** ses données passées ;
 la supprimer efface aussi son historique.

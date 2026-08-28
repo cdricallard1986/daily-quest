@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr" data-app="2026.08.17-7">
+<html lang="fr" data-app="2026.08.28-8">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Daily Quest</title>
-<meta name="description" content="Suivi quotidien d'habitudes — coches, quantités et historique semaine / mois / année.">
+<meta name="description" content="Suivi quotidien d'habitudes — chaque point se répond par oui ou par non, avec historique semaine / mois / année.">
 <meta name="theme-color" content="#f4f6f9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -73,6 +73,8 @@
         </div>
       </div>
     </div>
+
+    <p class="rappel cachee" id="rappel-attente" role="status"></p>
 
     <ul class="liste-habitudes" id="liste-habitudes"></ul>
   </section>
@@ -156,30 +158,9 @@
       <input type="text" id="ch-emoji" maxlength="4" placeholder="💧" autocomplete="off">
     </label>
 
-    <div class="champ">
-      <span>Type de suivi</span>
-      <div class="choix" id="ch-type">
-        <button class="choix-btn" data-type="bool" type="button">À cocher</button>
-        <button class="choix-btn" data-type="quant" type="button">Quantité</button>
-      </div>
-    </div>
-
-    <div id="bloc-quant">
-      <div class="ligne-champs">
-        <label class="champ">
-          <span>Objectif</span>
-          <input type="number" id="ch-cible" min="0" step="any" inputmode="decimal">
-        </label>
-        <label class="champ">
-          <span>Unité</span>
-          <input type="text" id="ch-unite" maxlength="10" placeholder="min" autocomplete="off">
-        </label>
-        <label class="champ">
-          <span>Pas</span>
-          <input type="number" id="ch-pas" min="0" step="any" inputmode="decimal">
-        </label>
-      </div>
-    </div>
+    <p class="aide">Chaque point se valide par oui ou par non. Si l'habitude a un
+      objectif chiffré, mets-le dans le nom (« Eau 3 L ») : la réponse reste alors
+      évidente au moment de la cocher.</p>
 
     <div class="actions-modale">
       <button class="btn-primaire pleine-largeur cachee" id="btn-creer" type="button">Créer l'habitude</button>
@@ -237,21 +218,6 @@
   <div class="modale-corps">
     <p id="confirm-message"></p>
     <div class="actions-modale" id="confirm-actions"></div>
-  </div>
-</div>
-
-<!-- Saisie d'une quantité -->
-<div class="modale modale-petite cachee" id="modale-quantite" role="dialog" aria-modal="true" aria-labelledby="quantite-titre">
-  <div class="modale-entete">
-    <h2 id="quantite-titre">Quantité</h2>
-    <button class="btn-icone" data-fermer type="button" aria-label="Fermer">✕</button>
-  </div>
-  <div class="modale-corps">
-    <label class="champ">
-      <span id="quantite-lib">Valeur</span>
-      <input type="number" id="ch-quantite" step="any" min="0" inputmode="decimal">
-    </label>
-    <button class="btn-primaire pleine-largeur" id="btn-valider-quantite" type="button">Valider</button>
   </div>
 </div>
 
