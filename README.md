@@ -9,7 +9,7 @@ hors-ligne.
 
 ---
 
-## Les deux onglets
+## Les trois onglets
 
 ### 1. Aujourd'hui
 
@@ -17,7 +17,8 @@ hors-ligne.
   (jour ici, période dans l'historique). Impossible d'aller au-delà d'aujourd'hui.
 - Un anneau de progression (`8 / 12`, `67 %`) et trois indicateurs de jeu :
   **série** (🔥 jours consécutifs au-dessus de l'objectif), **record** (meilleure série
-  historique) et **niveau** (1 XP par point validé, un niveau tous les 50 XP).
+  historique) et **niveau** (1 XP par point validé **plus les points des bonus
+  débloqués**, un niveau tous les 50 XP).
 - **Un seul type de point : oui ou non.** Chaque ligne porte deux boutons, `✓` et `✕` ;
   un appui ailleurs sur la ligne vaut `✓`. Réappuyer sur la réponse déjà donnée
   l'annule et remet le point en attente. Un objectif chiffré se met simplement dans
@@ -73,6 +74,32 @@ affichée, et sur elle seule :
 | 🐢 **La moins réalisée** | pourcentage le plus faible |
 
 À égalité, c'est la première habitude dans ton ordre d'affichage qui l'emporte.
+
+### 3. Bonus
+
+Vingt-six récompenses à débloquer, réparties en sept familles. En haut : le total de
+points bonus, le nombre de récompenses obtenues, et le **prochain palier** — celui dont
+tu es le plus près. Chaque bonus affiche sa progression, qu'il soit pris ou non ; rien
+n'est caché, on voit ce qui reste à faire.
+
+| Famille | Mesure | Paliers |
+|---|---|---|
+| 🔥 Constance sur une habitude | plus longue suite de « oui » sur une même habitude | 7, 14, 30, 60, 100, 365 j |
+| 🏅 Journées au-dessus de l'objectif | plus longue suite de journées validées | 7, 30, 90, 365 j |
+| 💯 Journées parfaites | journées à 100 % | 1, 10, 50, 100 |
+| ✅ Points validés | total de « oui » depuis le début | 50, 250, 1 000, 5 000 |
+| 📅 Assiduité | journées suivies, même imparfaites | 7, 30, 100, 365 j |
+| 🎯 Semaines parfaites | semaines entières à 100 %, du lundi au dimanche | 1, 4 |
+| 🧭 Rigueur | semaines entières sans le moindre `?` | 1, 4 |
+
+Les points gagnés alimentent le **niveau** affiché sur l'onglet Aujourd'hui. Un bonus
+franchi au moment où tu coches est annoncé tout de suite, sans avoir à ouvrir l'onglet.
+
+Rien n'est stocké : tout se recalcule depuis l'historique, en une seule traversée
+mémorisée jusqu'au prochain enregistrement. Un bonus se **reprend** donc si les données
+changent — corriger une réponse en trop, par exemple. Les séries par habitude comptent
+les habitudes archivées : une série accomplie reste acquise, archiver conservant
+justement l'historique.
 
 ---
 

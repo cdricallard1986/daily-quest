@@ -10,7 +10,7 @@
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.09.05-11';
+  const VERSION = '2026.09.05-12';
 
   const CLE_STOCKAGE = 'dq.v1';
   /* v2 : abandon des quantités, chaque point se répond par oui ou par non. */
@@ -40,6 +40,80 @@
     { nom: 'Lecture 30 min', emoji: '📚' },
     { nom: 'Eau 3 L', emoji: '💧' },
     { nom: 'Méditation 10 min', emoji: '🧘' }
+  ];
+
+  /* Bonus à débloquer. Chaque famille se ramène à un seul nombre calculé
+     dans le bilan (`mesure`), et chaque palier est franchi dès que ce nombre
+     l'atteint : la progression se lit alors partout de la même façon. */
+  const FAMILLES_BONUS = [
+    {
+      mesure: 'serieHabitude', emoji: '🔥', titre: 'Constance sur une habitude',
+      unite: 'j', modele: '@ jours d\u2019affilée sur une même habitude',
+      paliers: [
+        { seuil: 7, nom: 'Braise', points: 25 },
+        { seuil: 14, nom: 'Flamme', points: 50 },
+        { seuil: 30, nom: 'Feu', points: 100 },
+        { seuil: 60, nom: 'Brasier', points: 200 },
+        { seuil: 100, nom: 'Incendie', points: 400 },
+        { seuil: 365, nom: 'Année de feu', points: 1500 }
+      ]
+    },
+    {
+      mesure: 'serieJour', emoji: '🏅', titre: 'Journées au-dessus de l\u2019objectif',
+      unite: 'j', modele: '@ journées d\u2019affilée au-dessus de ton objectif',
+      paliers: [
+        { seuil: 7, nom: 'Semaine tenue', points: 40 },
+        { seuil: 30, nom: 'Mois tenu', points: 150 },
+        { seuil: 90, nom: 'Trimestre tenu', points: 500 },
+        { seuil: 365, nom: 'Année tenue', points: 2000 }
+      ]
+    },
+    {
+      mesure: 'joursParfaits', emoji: '💯', titre: 'Journées parfaites',
+      unite: 'j', modele: '@ journées à 100 %',
+      paliers: [
+        { seuil: 1, nom: 'Sans faute', points: 20 },
+        { seuil: 10, nom: 'Dix sur dix', points: 80 },
+        { seuil: 50, nom: 'Cinquante', points: 300 },
+        { seuil: 100, nom: 'Centurion', points: 700 }
+      ]
+    },
+    {
+      mesure: 'pointsValides', emoji: '✅', titre: 'Points validés',
+      unite: '', modele: '@ points validés en tout',
+      paliers: [
+        { seuil: 50, nom: 'Premiers pas', points: 15 },
+        { seuil: 250, nom: 'Sur la lancée', points: 60 },
+        { seuil: 1000, nom: 'Machine', points: 250 },
+        { seuil: 5000, nom: 'Légende', points: 1200 }
+      ]
+    },
+    {
+      mesure: 'joursSuivis', emoji: '📅', titre: 'Assiduité',
+      unite: 'j', modele: '@ journées suivies, même imparfaites',
+      paliers: [
+        { seuil: 7, nom: 'Première semaine', points: 20 },
+        { seuil: 30, nom: 'Premier mois', points: 70 },
+        { seuil: 100, nom: 'Cent jours', points: 250 },
+        { seuil: 365, nom: 'Une année', points: 1000 }
+      ]
+    },
+    {
+      mesure: 'semainesParfaites', emoji: '🎯', titre: 'Semaines parfaites',
+      unite: '', modele: '@ semaine(s) entière(s) à 100 %, du lundi au dimanche',
+      paliers: [
+        { seuil: 1, nom: 'Sans accroc', points: 300 },
+        { seuil: 4, nom: 'Mois sans accroc', points: 900 }
+      ]
+    },
+    {
+      mesure: 'semainesSansOubli', emoji: '🧭', titre: 'Rigueur',
+      unite: '', modele: '@ semaine(s) entière(s) sans le moindre « ? »',
+      paliers: [
+        { seuil: 1, nom: 'Tout répondu', points: 120 },
+        { seuil: 4, nom: 'Un mois sans oubli', points: 400 }
+      ]
+    }
   ];
 
   /* ─────────────── Utilitaires de date ─────────────── */
@@ -166,6 +240,7 @@
   function sauver() {
     try {
       localStorage.setItem(CLE_STOCKAGE, JSON.stringify(etat));
+      versionEtat++;              // invalide le bilan mémorisé
       return true;
     } catch (e) {
       console.error('Écriture impossible', e);
@@ -275,9 +350,125 @@
     return record;
   }
 
+  /** 1 XP par point validé, plus les points des bonus débloqués. */
   function xpTotal() {
+    return bilan().pointsValides + pointsBonus();
+  }
+
+  /* ─────────────── Bonus ─────────────── */
+
+  let versionEtat = 0;
+  let bilanMemo = null;
+  let bilanVersion = -1;
+
+  /**
+   * Toutes les mesures dont dépendent les bonus, en une seule traversée de
+   * l'historique. Le résultat est mémorisé et refait à chaque enregistrement :
+   * il est relu à chaque rendu, on ne rebalaie pas l'année pour autant.
+   */
+  function bilan() {
+    if (bilanMemo && bilanVersion === versionEtat) return bilanMemo;
+    bilanMemo = calculerBilan();
+    bilanVersion = versionEtat;
+    return bilanMemo;
+  }
+
+  function calculerBilan() {
+    const vide = {
+      serieHabitude: 0, serieJour: 0, joursParfaits: 0,
+      pointsValides: 0, joursSuivis: 0, semainesParfaites: 0, semainesSansOubli: 0
+    };
     const habs = habitudesActives();
-    return Object.keys(etat.jours).reduce((somme, cle) => somme + scoreJour(cle, habs).faits, 0);
+    const cles = Object.keys(etat.jours).sort();
+    if (!cles.length || !habs.length) return vide;
+
+    const b = Object.assign({}, vide);
+    // Les séries par habitude portent sur toutes les habitudes, archivées
+    // comprises : une série accomplie reste acquise même si l'habitude est
+    // rangée ensuite — archiver conserve justement son historique.
+    const series = {};
+    etat.habitudes.forEach((h) => { series[h.id] = 0; });
+
+    const semaines = {};
+    let serieJour = 0;
+    let d = dateDe(cles[0]);
+    const fin = aujourdHui();
+
+    while (d <= fin) {
+      const cle = cleDe(d);
+      const valeurs = valeursDu(cle);
+      let faits = 0;
+      let toutRepondu = true;
+
+      etat.habitudes.forEach((h) => {
+        if (valeurs[h.id] === true) {
+          series[h.id]++;
+          if (series[h.id] > b.serieHabitude) b.serieHabitude = series[h.id];
+        } else {
+          series[h.id] = 0;
+        }
+      });
+      habs.forEach((h) => {
+        if (valeurs[h.id] === true) faits++;
+        if (valeurs[h.id] !== true && valeurs[h.id] !== false) toutRepondu = false;
+      });
+
+      const suivi = jourRenseigne(cle);
+      const parfait = suivi && faits === habs.length;
+      b.pointsValides += faits;
+      if (suivi) b.joursSuivis++;
+      if (parfait) b.joursParfaits++;
+
+      if (objectifAtteint(cle, habs)) {
+        serieJour++;
+        if (serieJour > b.serieJour) b.serieJour = serieJour;
+      } else {
+        serieJour = 0;
+      }
+
+      const cleSem = cleDe(debutSemaine(d));
+      const sem = semaines[cleSem] || (semaines[cleSem] = { jours: 0, parfaits: 0, repondus: 0 });
+      sem.jours++;
+      if (parfait) sem.parfaits++;
+      if (toutRepondu) sem.repondus++;
+
+      d = ajouterJours(d, 1);
+    }
+
+    // Seules les semaines entièrement traversées comptent : celles des deux
+    // bouts sont incomplètes, elles ne peuvent pas être jugées.
+    Object.keys(semaines).forEach((k) => {
+      const sem = semaines[k];
+      if (sem.jours < 7) return;
+      if (sem.parfaits === 7) b.semainesParfaites++;
+      if (sem.repondus === 7) b.semainesSansOubli++;
+    });
+
+    return b;
+  }
+
+  /** Tous les bonus, acquis ou non, à plat. */
+  function evaluerBonus() {
+    const b = bilan();
+    const liste = [];
+    FAMILLES_BONUS.forEach((famille) => {
+      const valeur = b[famille.mesure] || 0;
+      famille.paliers.forEach((palier) => {
+        liste.push({
+          id: famille.mesure + '-' + palier.seuil,
+          famille: famille,
+          palier: palier,
+          valeur: valeur,
+          acquis: valeur >= palier.seuil,
+          progression: Math.min(1, valeur / palier.seuil)
+        });
+      });
+    });
+    return liste;
+  }
+
+  function pointsBonus(liste) {
+    return (liste || evaluerBonus()).reduce((somme, x) => somme + (x.acquis ? x.palier.points : 0), 0);
   }
 
   /**
@@ -416,6 +607,7 @@
     $('#nav-sous-titre').textContent = estAujourdHui
       ? "Aujourd'hui · " + jourCourant.getFullYear()
       : hier ? 'Hier · ' + jourCourant.getFullYear() : String(jourCourant.getFullYear());
+    $('#nav-prec').disabled = false;
     $('#nav-suiv').disabled = estAujourdHui;
     suivaitAujourdHui = estAujourdHui;
 
@@ -563,6 +755,7 @@
     // une erreur sans avoir à répondre l'inverse.
     definirValeur(cle, h.id, actuelle === voulue ? null : voulue);
     rendreJour();
+    signalerNouveauxBonus();
   }
 
   /* ─────────────── Onglet Historique ─────────────── */
@@ -628,6 +821,7 @@
       $('#nav-titre').textContent = String(ancreHistorique.getFullYear());
       $('#nav-sous-titre').textContent = cles.length + ' jours';
     }
+    $('#nav-prec').disabled = false;
     $('#nav-suiv').disabled = periodeEstCourante();
 
     // Résumé
@@ -1077,6 +1271,128 @@
     return vide;
   }
 
+  /* ─────────────── Onglet Bonus ─────────────── */
+
+  function rendreBonus() {
+    const liste = evaluerBonus();
+    const acquis = liste.filter((x) => x.acquis);
+
+    $('#nav-titre').textContent = 'Bonus';
+    $('#nav-sous-titre').textContent = acquis.length + ' sur ' + liste.length + ' débloqués';
+    $('#nav-prec').disabled = true;
+    $('#nav-suiv').disabled = true;
+
+    $('#bonus-points').textContent = fmt(pointsBonus(liste));
+    $('#bonus-compte').textContent = acquis.length + ' / ' + liste.length;
+    $('#bonus-compte-lib').textContent = 'récompenses';
+    $('#bonus-jauge').style.width = (acquis.length / liste.length * 100).toFixed(1) + '%';
+
+    // Le prochain palier est celui dont on est le plus près : c'est celui
+    // qui donne envie de continuer aujourd'hui.
+    const restants = liste.filter((x) => !x.acquis);
+    const suivant = restants.length
+      ? restants.reduce((m, x) => (x.progression > m.progression ? x : m))
+      : null;
+    $('#bonus-suivant').textContent = suivant
+      ? 'Prochain : ' + suivant.palier.nom + ' — ' + descriptionBonus(suivant) +
+        ' (' + fmt(suivant.valeur) + ' / ' + fmt(suivant.palier.seuil) + ')'
+      : 'Tout est débloqué. Chapeau.';
+
+    const boite = $('#bonus-listes');
+    boite.innerHTML = '';
+    FAMILLES_BONUS.forEach((famille) => {
+      const dedans = liste.filter((x) => x.famille === famille);
+      const titre = document.createElement('h2');
+      titre.className = 'titre-section';
+      titre.textContent = famille.emoji + ' ' + famille.titre;
+      boite.appendChild(titre);
+
+      const carte = document.createElement('div');
+      carte.className = 'carte bonus-groupe';
+      dedans.forEach((x) => carte.appendChild(ligneBonus(x)));
+      boite.appendChild(carte);
+    });
+  }
+
+  /** « 30 jours d'affilée sur une même habitude » */
+  function descriptionBonus(x) {
+    return x.famille.modele.replace('@', fmt(x.palier.seuil));
+  }
+
+  function ligneBonus(x) {
+    const ligne = document.createElement('div');
+    ligne.className = 'bonus' + (x.acquis ? ' acquis' : '');
+
+    const icone = document.createElement('div');
+    icone.className = 'bonus-icone';
+    icone.textContent = x.acquis ? x.famille.emoji : '🔒';
+    ligne.appendChild(icone);
+
+    const corps = document.createElement('div');
+    corps.className = 'bonus-corps';
+
+    const haut = document.createElement('div');
+    haut.className = 'bonus-haut';
+    const nom = document.createElement('span');
+    nom.className = 'bonus-nom';
+    nom.textContent = x.palier.nom;
+    const pts = document.createElement('span');
+    pts.className = 'bonus-pts';
+    pts.textContent = '+' + fmt(x.palier.points);
+    haut.appendChild(nom);
+    haut.appendChild(pts);
+    corps.appendChild(haut);
+
+    const desc = document.createElement('div');
+    desc.className = 'bonus-desc';
+    desc.textContent = descriptionBonus(x);
+    corps.appendChild(desc);
+
+    // Barre et chiffre sur la même ligne : vingt-six bonus tiennent alors
+    // en moins de deux écrans.
+    const bas = document.createElement('div');
+    bas.className = 'bonus-bas';
+
+    const piste = document.createElement('div');
+    piste.className = 'bonus-piste';
+    const rempli = document.createElement('i');
+    rempli.style.width = (x.progression * 100).toFixed(1) + '%';
+    piste.appendChild(rempli);
+    bas.appendChild(piste);
+
+    const etat = document.createElement('span');
+    etat.className = 'bonus-etat';
+    const u = x.famille.unite ? ' ' + x.famille.unite : '';
+    etat.textContent = x.acquis
+      ? '✓ ' + fmt(x.valeur) + u
+      : fmt(x.valeur) + ' / ' + fmt(x.palier.seuil) + u;
+    bas.appendChild(etat);
+    corps.appendChild(bas);
+
+    ligne.appendChild(corps);
+    return ligne;
+  }
+
+  /* Un bonus tombe au moment où on coche : on le dit tout de suite, sinon la
+     récompense n'existe que pour qui pense à ouvrir l'onglet. */
+  let bonusConnus = null;
+
+  function memoriserBonus() {
+    bonusConnus = evaluerBonus().filter((x) => x.acquis).map((x) => x.id);
+  }
+
+  function signalerNouveauxBonus() {
+    if (bonusConnus === null) { memoriserBonus(); return; }
+    const avant = bonusConnus;
+    const liste = evaluerBonus();
+    const nouveaux = liste.filter((x) => x.acquis && avant.indexOf(x.id) === -1);
+    bonusConnus = liste.filter((x) => x.acquis).map((x) => x.id);
+    if (!nouveaux.length) return;
+    const gagnes = nouveaux.reduce((somme, x) => somme + x.palier.points, 0);
+    toast('🏆 ' + (nouveaux.length > 1 ? nouveaux.length + ' bonus débloqués' : 'Bonus débloqué : ' + nouveaux[0].palier.nom) +
+      ' · +' + fmt(gagnes) + ' pts', 'succes');
+  }
+
   /* ─────────────── Navigation entre onglets ─────────────── */
 
   let vueActive = 'jour';
@@ -1086,13 +1402,16 @@
     $$('.onglet').forEach((o) => o.classList.toggle('actif', o.dataset.vue === nom));
     $('#vue-jour').classList.toggle('cachee', nom !== 'jour');
     $('#vue-historique').classList.toggle('cachee', nom !== 'historique');
+    $('#vue-bonus').classList.toggle('cachee', nom !== 'bonus');
     window.scrollTo(0, 0);
     if (nom === 'historique') rendreHistorique();
+    else if (nom === 'bonus') rendreBonus();
     else rendreJour();
   }
 
   /** Les flèches de l'en-tête pilotent la vue affichée. */
   function reculer() {
+    if (vueActive === 'bonus') return;
     if (vueActive === 'jour') {
       jourCourant = ajouterJours(jourCourant, -1);
       rendreJour();
@@ -1102,6 +1421,7 @@
   }
 
   function avancer() {
+    if (vueActive === 'bonus') return;
     if (vueActive === 'jour') {
       if (memeJour(jourCourant, aujourdHui())) return;
       jourCourant = ajouterJours(jourCourant, 1);
@@ -1821,6 +2141,7 @@
     appliquerTheme();
     try {
       brancher();
+      memoriserBonus();      // référence pour ne signaler que les nouveaux
       rendreJour();
       stabiliserPuisAfficher();
     } catch (e) {

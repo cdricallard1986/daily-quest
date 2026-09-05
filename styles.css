@@ -433,7 +433,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   bottom: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   padding: 8px 12px calc(8px + var(--bas));
   background: var(--fond-flou);
@@ -636,6 +636,76 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 .barre-piste { flex: 1; height: 18px; border-radius: 9px; background: var(--surface-2); overflow: hidden; }
 .barre-piste i { display: block; height: 100%; background: linear-gradient(90deg, var(--or), var(--or-clair)); border-radius: 9px; }
 .barre-val { width: 40px; text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--texte-doux); flex: none; }
+
+/* ─────────── Bonus ─────────── */
+.bonus-resume { padding: 14px; }
+.bonus-tete { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.bonus-chiffre { display: flex; flex-direction: column; min-width: 0; }
+.bonus-chiffre.droite { text-align: right; }
+.bonus-gros {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--or-texte);
+  font-variant-numeric: tabular-nums;
+}
+.bonus-chiffre.droite .bonus-gros { font-size: 20px; color: var(--texte); }
+.bonus-lib { font-size: 10.5px; color: var(--texte-faible); }
+.bonus-suivant { margin: 10px 0 0; font-size: 11.5px; color: var(--texte-doux); line-height: 1.35; }
+
+.bonus-piste { height: 5px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: 7px; }
+.bonus-piste.grande { height: 8px; border-radius: 4px; margin-top: 12px; }
+.bonus-piste i { display: block; height: 100%; border-radius: 3px; background: var(--bordure); }
+.bonus-piste.grande i { background: linear-gradient(90deg, var(--or), var(--or-clair)); }
+
+.bonus-groupe { padding: 4px 14px; }
+.bonus {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--bordure);
+}
+.bonus:first-child { border-top: 0; }
+.bonus-icone {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  background: var(--surface-2);
+  /* Un bonus non acquis reste lisible mais visiblement en retrait. */
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+.bonus.acquis .bonus-icone { background: var(--or-doux); filter: none; opacity: 1; }
+
+.bonus-corps { flex: 1; min-width: 0; }
+.bonus-haut { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.bonus-nom { font-size: 14.5px; font-weight: 650; color: var(--texte-faible); }
+.bonus.acquis .bonus-nom { color: var(--texte); }
+.bonus-pts {
+  flex: none;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--texte-faible);
+  font-variant-numeric: tabular-nums;
+}
+.bonus.acquis .bonus-pts { color: var(--or-texte); }
+.bonus-desc { font-size: 11.5px; color: var(--texte-faible); margin-top: 1px; line-height: 1.3; }
+.bonus-bas { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.bonus-bas .bonus-piste { flex: 1; margin-top: 0; }
+.bonus-etat {
+  flex: none;
+  font-size: 11px;
+  color: var(--texte-faible);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bonus.acquis .bonus-etat { color: var(--vert-texte); font-weight: 600; }
+.bonus.acquis .bonus-piste i { background: var(--vert); }
 
 /* ─────────── Ce qui ressort ─────────── */
 .faits { padding: 4px 14px; }
