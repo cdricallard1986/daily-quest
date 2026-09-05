@@ -145,6 +145,12 @@ body {
   min-height: 100vh;
 }
 
+/* Masqué au démarrage, le temps que la hauteur des lignes soit calculée sur
+   une mise en page arrêtée (voir stabiliserPuisAfficher). La couleur de fond
+   reste visible, donc pas d'écran blanc en thème sombre. Le contenu est bien
+   là : il est seulement transparent, jamais retiré du flux. */
+body.chargement { opacity: 0; }
+
 h1, h2, h3 { margin: 0; font-weight: 650; letter-spacing: -0.01em; }
 
 button {

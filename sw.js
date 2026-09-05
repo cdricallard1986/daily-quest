@@ -5,7 +5,7 @@
    qui laissait l'application vide.
    Corollaire : CACHE doit être incrémenté à chaque déploiement, sans quoi
    plus rien ne se met à jour. */
-const CACHE = 'daily-quest-v10';
+const CACHE = 'daily-quest-v11';
 
 const FICHIERS = [
   './',

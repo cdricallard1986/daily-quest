@@ -10,7 +10,7 @@
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.09.05-10';
+  const VERSION = '2026.09.05-11';
 
   const CLE_STOCKAGE = 'dq.v1';
   /* v2 : abandon des quantités, chaque point se répond par oui ou par non. */
@@ -511,16 +511,34 @@
   function ajusterDensite() {
     const liste = $('#liste-habitudes');
     const nb = liste.children.length;
-    if (!nb) return;
+    if (!nb) return 0;
 
     const ECART = 6;
     const haut = liste.getBoundingClientRect().top;
     const onglets = document.querySelector('.onglets').getBoundingClientRect().height;
-    const dispo = window.innerHeight - haut - onglets - 10;
+    // visualViewport donne la hauteur réellement visible ; innerHeight, sur
+    // iPhone, se stabilise plus tard et faisait sauter les lignes.
+    const vue = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    const dispo = vue - haut - onglets - 10;
     const brut = Math.floor((dispo - ECART * (nb - 1)) / nb);
     const hauteur = Math.max(34, Math.min(58, brut));
 
     document.documentElement.style.setProperty('--h-ligne', hauteur + 'px');
+    return hauteur;
+  }
+
+  /** Une modale est-elle ouverte ? Le clavier rétrécit alors la vue. */
+  function modaleOuverte() {
+    return $$('.modale').some((m) => !m.classList.contains('cachee'));
+  }
+
+  /**
+   * Recalcule la densité, sauf quand la mesure n'a pas de sens : autre
+   * onglet, ou modale ouverte — le clavier réduit alors la hauteur visible
+   * et les lignes du fond se mettraient à bouger toutes seules.
+   */
+  function ajusterSiPertinent() {
+    if (vueActive === 'jour' && !modaleOuverte()) ajusterDensite();
   }
 
   function surClicHabitude(evt) {
@@ -1143,6 +1161,9 @@
   function fermerModales() {
     $$('.modale').forEach((m) => m.classList.add('cachee'));
     $('#voile').classList.add('cachee');
+    // Le clavier a pu rétrécir la vue pendant la saisie : on remesure une
+    // fois la modale refermée, jamais pendant.
+    ajusterSiPertinent();
   }
 
   /**
@@ -1625,8 +1646,9 @@
     $('#liste-habitudes').addEventListener('click', surClicHabitude);
 
     // La densité dépend de la hauteur utile : à recalculer si elle change.
-    window.addEventListener('resize', () => { if (vueActive === 'jour') ajusterDensite(); });
-    window.addEventListener('orientationchange', () => setTimeout(ajusterDensite, 200));
+    window.addEventListener('resize', ajusterSiPertinent);
+    window.addEventListener('orientationchange', () => setTimeout(ajusterSiPertinent, 200));
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', ajusterSiPertinent);
 
     // Historique : balayage horizontal pour changer de semaine, de mois ou d'année
     const vueHist = $('#vue-historique');
@@ -1764,16 +1786,46 @@
     zone.appendChild(bouton);
   }
 
+  /** Dévoile l'écran. Sans effet si c'est déjà fait. */
+  function afficherEcran() {
+    document.body.classList.remove('chargement');
+  }
+
+  /**
+   * Attend que la mise en page ne bouge plus avant de montrer quoi que ce
+   * soit. La hauteur des lignes se déduit de la place disponible, or sur
+   * iPhone celle-ci n'est pas connue au premier rendu : l'écran s'affichait,
+   * puis se redimensionnait tout seul. On mesure d'une trame à l'autre et on
+   * dévoile dès que deux mesures concordent, avec un plafond pour ne jamais
+   * rester masqué.
+   */
+  function stabiliserPuisAfficher() {
+    let precedente = null;
+    let essais = 10;
+    const passe = () => {
+      const hauteur = ajusterDensite();
+      if (hauteur === precedente || --essais <= 0) {
+        afficherEcran();
+        return;
+      }
+      precedente = hauteur;
+      requestAnimationFrame(passe);
+    };
+    requestAnimationFrame(passe);
+  }
+
   function demarrer() {
-    if (verifierCoherence()) return;
+    if (verifierCoherence()) return;   // une réparation recharge la page
     etat = charger();
     sauver();
     appliquerTheme();
     try {
       brancher();
       rendreJour();
+      stabiliserPuisAfficher();
     } catch (e) {
       afficherPanne(e);
+      afficherEcran();
       return;
     }
 

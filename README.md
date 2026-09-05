@@ -33,6 +33,11 @@ hors-ligne.
   pénalise ni la moyenne ni la série.
 - Les lignes sont **compactées automatiquement** pour que toutes les habitudes tiennent
   à l'écran sans défilement (voir `ajusterDensite`), jusqu'à un plancher de 34 px.
+  Cette hauteur dépendant de la place disponible, l'écran **reste masqué au démarrage**
+  tant que deux mesures successives ne concordent pas : sinon l'affichage apparaissait
+  puis se redimensionnait tout seul, la hauteur utile n'étant pas connue au premier
+  rendu sur iPhone. Un filet dans `index.html` dévoile la page au bout de 1,2 s quoi
+  qu'il arrive, y compris si le script ne démarre pas.
 - **Gérer mes habitudes** se trouve dans les réglages ⚙ : ajouter, renommer, archiver
   ou supprimer. L'ordre se change en **maintenant la poignée `≡`** et en faisant glisser
   la ligne ; la liste défile toute seule quand on approche du bord. L'éditeur enregistre en continu ; le bouton vert **Terminé** ne
