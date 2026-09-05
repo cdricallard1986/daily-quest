@@ -22,12 +22,14 @@ hors-ligne.
   un appui ailleurs sur la ligne vaut `✓`. Réappuyer sur la réponse déjà donnée
   l'annule et remet le point en attente. Un objectif chiffré se met simplement dans
   l'intitulé (« Eau 3 L », « Marche 10 000 pas »).
-- Trois états, donc, et non deux : **oui** (ligne verte), **non** (ligne rouge) et
-  **sans réponse** (bordure pointillée). Un bandeau au-dessus de la liste compte les
-  points encore en attente.
-- **À la fin de la journée, ce qui n'a pas été répondu passe à « non ».** La clôture
-  a lieu au passage de minuit si l'app est ouverte, sinon au lancement suivant.
-  Une journée jamais ouverte n'est pas clôturée : elle reste « non suivie » et ne
+- Quatre états, donc, et non deux : **oui** (ligne verte), **non** (ligne rouge),
+  **en attente** (bordure pointillée, sur la journée en cours) et **oublié**
+  (ligne jaune marquée d'un `?`).
+- **À la fin de la journée, ce qui n'a pas été répondu devient un `?` jaune.** Ce n'est
+  pas un « non » assumé, mais **c'est compté comme non accompli** dans tous les calculs :
+  score du jour, moyennes, séries, XP. Rien n'est écrit dans les données — l'état se
+  déduit de la date, si bien qu'un oubli reste rattrapable en revenant sur le jour.
+  Une journée jamais ouverte n'est pas concernée : elle reste « non suivie » et ne
   pénalise ni la moyenne ni la série.
 - Les lignes sont **compactées automatiquement** pour que toutes les habitudes tiennent
   à l'écran sans défilement (voir `ajusterDensite`), jusqu'à un plancher de 34 px.
@@ -38,17 +40,28 @@ hors-ligne.
 
 ### 2. Historique
 
-Trois modes, avec navigation vers les périodes passées :
+Trois modes, avec navigation vers les périodes passées — par les flèches `‹` / `›`
+de l'en-tête ou en **balayant l'écran horizontalement** (vers la droite pour reculer,
+vers la gauche pour revenir). La carte de chaleur de l'année garde son propre
+défilement horizontal.
 
 | Mode | Affichage |
 |---|---|
-| **Semaine** | Grille habitudes × 7 jours : `✓` oui, `✕` non, case vide sans réponse, plus le total par jour. |
+| **Semaine** | Grille habitudes × 7 jours : `✓` oui, `✕` non, `?` oublié, case vide sans réponse, plus le total par jour. |
 | **Mois** | Calendrier coloré par taux de réussite ; un appui sur un jour l'ouvre dans l'onglet Aujourd'hui. |
 | **Année** | Carte de chaleur des 365 jours (défilement horizontal) + moyenne par mois. |
 
-Chaque mode affiche en dessous un **résumé** (moyenne, jours à 100 %, jours suivis, points
-validés) et le **détail par habitude** : jours répondus **oui**, jours répondus **non**,
-et le pourcentage de réussite sur les jours suivis.
+Au-dessus, un **résumé** de la période (moyenne, jours à 100 %, jours suivis, points
+validés). En dessous, **ce qui ressort** — trois enseignements calculés sur la période
+affichée, et sur elle seule :
+
+| | |
+|---|---|
+| 🥇 **La mieux tenue** | meilleur pourcentage de « oui » sur les jours suivis |
+| 🔥 **Plus longue série** | plus grand nombre de jours consécutifs à « oui » |
+| 🐢 **La moins réalisée** | pourcentage le plus faible |
+
+À égalité, c'est la première habitude dans ton ordre d'affichage qui l'emporte.
 
 ---
 
@@ -175,7 +188,7 @@ lancement en mode sombre.
     { "id": "h11", "nom": "Eau 3 L", "emoji": "💧", "type": "bool", "archivee": false }
   ],
   "jours": {
-    // true = oui, false = non, clé absente = pas encore répondu
+    // true = oui, false = non, clé absente = sans réponse
     "2026-08-17": { "h1": true, "h11": false }
   },
   "reglages": { "objectif": 80, "theme": "auto" } // % pour la série, apparence
@@ -184,7 +197,12 @@ lancement en mode sombre.
 
 Une journée absente de `jours` est considérée comme **non suivie** (grise dans l'historique),
 et non comme un échec — elle ne pénalise pas les moyennes. Dès qu'une réponse y est
-enregistrée, la journée est suivie : à sa clôture, les points restants passent à `false`.
+enregistrée, la journée est suivie.
+
+Une clé absente se lit différemment selon la date : « pas encore répondu » sur la journée
+en cours, « oublié » (`?`) sur une journée écoulée et suivie. Rien n'est écrit à la
+clôture, l'état se déduit du calendrier — c'est ce qui permet de revenir corriger un
+oubli sans avoir à distinguer un « non » automatique d'un « non » voulu.
 
 Les sauvegardes en `version: 1` (habitudes de type `quant`) sont migrées au chargement
 comme à l'import : l'objectif chiffré rejoint l'intitulé et chaque valeur passée est relue

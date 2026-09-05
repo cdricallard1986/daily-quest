@@ -328,6 +328,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 }
 .habitude.faite { border-color: rgba(var(--vert-rgb), 0.45); background: linear-gradient(90deg, var(--vert-doux), var(--surface) 60%); }
 .habitude.ratee { border-color: var(--rouge-bord); background: linear-gradient(90deg, var(--rouge-doux), var(--surface) 60%); }
+.habitude.oubliee { border-color: var(--or-bord); background: linear-gradient(90deg, var(--or-doux), var(--surface) 60%); }
 /* Sans réponse : bordure marquée, la ligne se voit de loin dans la liste. */
 .habitude.attente { border-style: dashed; border-color: var(--or-bord); }
 
@@ -345,6 +346,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 }
 .habitude.faite .hab-emoji { background: var(--vert-doux); }
 .habitude.ratee .hab-emoji { background: var(--rouge-doux); }
+.habitude.oubliee .hab-emoji { background: var(--or-doux); }
 
 .hab-nom {
   flex: 1;
@@ -358,6 +360,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 }
 .habitude.faite .hab-nom { color: var(--vert-texte); }
 .habitude.ratee .hab-nom { color: var(--rouge-texte); }
+.habitude.oubliee .hab-nom { color: var(--or-texte); }
 
 /* Oui et non côte à côte. Tant qu'aucun des deux n'est actif, les deux
    restent gris : l'absence de réponse se lit d'un coup d'œil. */
@@ -380,17 +383,20 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 .hab-oui.actif { background: var(--vert); border-color: var(--vert); color: var(--sur-vert); }
 .hab-non.actif { background: var(--rouge); border-color: var(--rouge); color: var(--sur-rouge); }
 
-/* Rappel des points encore sans réponse. */
-.rappel {
-  margin: 0 0 8px;
-  padding: 7px 11px;
-  border-radius: var(--rayon-s);
+/* Journée écoulée, point jamais répondu : ni oui ni non assumé, mais
+   compté comme non accompli. */
+.hab-oubli {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--or-texte);
   background: var(--or-doux);
   border: 1px solid var(--or-bord);
-  color: var(--or-texte);
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1.35;
 }
 
 /* ─────────── Boutons ─────────── */
@@ -515,6 +521,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 }
 .pastille.ok { background: var(--vert); border-color: var(--vert-texte); color: var(--sur-vert); }
 .pastille.non { background: var(--rouge-doux); border-color: var(--rouge-bord); color: var(--rouge-texte); font-weight: 700; }
+.pastille.oubli { background: var(--or-doux); border-color: var(--or-bord); color: var(--or-texte); font-weight: 700; }
 .ligne-total td { padding-top: 8px !important; }
 .total-jour {
   font-size: 11px;
@@ -591,25 +598,41 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 .barre-piste i { display: block; height: 100%; background: linear-gradient(90deg, var(--or), var(--or-clair)); border-radius: 9px; }
 .barre-val { width: 40px; text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--texte-doux); flex: none; }
 
-/* ─────────── Détail par habitude ─────────── */
-.detail-hab {
+/* ─────────── Ce qui ressort ─────────── */
+.faits { padding: 4px 14px; }
+.fait {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: 12px;
-  padding: 11px 13px;
-  margin-bottom: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--bordure);
 }
-.detail-corps { flex: 1; min-width: 0; }
-.detail-haut { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.detail-nom { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.detail-chiffre { font-size: 13px; font-weight: 700; color: var(--or-texte); flex: none; font-variant-numeric: tabular-nums; }
-.detail-sous { font-size: 11.5px; color: var(--texte-faible); margin-top: 1px; }
-.detail-jauge { height: 5px; border-radius: 3px; background: var(--surface-2); margin-top: 7px; overflow: hidden; }
-.detail-jauge i { display: block; height: 100%; border-radius: 3px; background: var(--or); }
-.detail-jauge i.plein { background: var(--vert); }
+.fait:first-child { border-top: 0; }
+.fait-corps { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fait-lib { font-size: 10.5px; color: var(--texte-faible); letter-spacing: 0.02em; }
+.fait-nom {
+  font-size: 14.5px;
+  font-weight: 650;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fait-mesure { flex: none; text-align: right; display: flex; flex-direction: column; }
+.fait-mesure strong { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.fait-mesure small { font-size: 10.5px; color: var(--texte-faible); }
+.fait-mesure.bon strong { color: var(--vert-texte); }
+.fait-mesure.or strong { color: var(--or-texte); }
+.fait-mesure.faible strong { color: var(--rouge-texte); }
+
+/* Le contenu glisse dans le sens du balayage : le geste se voit. */
+@keyframes venir-de-droite { from { opacity: 0.5; transform: translateX(22px); } }
+@keyframes venir-de-gauche { from { opacity: 0.5; transform: translateX(-22px); } }
+#hist-contenu.depuis-droite { animation: venir-de-droite 0.22s ease-out; }
+#hist-contenu.depuis-gauche { animation: venir-de-gauche 0.22s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  #hist-contenu.depuis-droite, #hist-contenu.depuis-gauche { animation: none; }
+}
 
 .vide-message {
   text-align: center;

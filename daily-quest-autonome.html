@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-app="2026.08.28-8">
+<html lang="fr" data-app="2026.09.05-9">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
@@ -342,6 +342,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 }
 .habitude.faite { border-color: rgba(var(--vert-rgb), 0.45); background: linear-gradient(90deg, var(--vert-doux), var(--surface) 60%); }
 .habitude.ratee { border-color: var(--rouge-bord); background: linear-gradient(90deg, var(--rouge-doux), var(--surface) 60%); }
+.habitude.oubliee { border-color: var(--or-bord); background: linear-gradient(90deg, var(--or-doux), var(--surface) 60%); }
 /* Sans réponse : bordure marquée, la ligne se voit de loin dans la liste. */
 .habitude.attente { border-style: dashed; border-color: var(--or-bord); }
 
@@ -359,6 +360,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 }
 .habitude.faite .hab-emoji { background: var(--vert-doux); }
 .habitude.ratee .hab-emoji { background: var(--rouge-doux); }
+.habitude.oubliee .hab-emoji { background: var(--or-doux); }
 
 .hab-nom {
   flex: 1;
@@ -372,6 +374,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 }
 .habitude.faite .hab-nom { color: var(--vert-texte); }
 .habitude.ratee .hab-nom { color: var(--rouge-texte); }
+.habitude.oubliee .hab-nom { color: var(--or-texte); }
 
 /* Oui et non côte à côte. Tant qu'aucun des deux n'est actif, les deux
    restent gris : l'absence de réponse se lit d'un coup d'œil. */
@@ -394,17 +397,20 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 .hab-oui.actif { background: var(--vert); border-color: var(--vert); color: var(--sur-vert); }
 .hab-non.actif { background: var(--rouge); border-color: var(--rouge); color: var(--sur-rouge); }
 
-/* Rappel des points encore sans réponse. */
-.rappel {
-  margin: 0 0 8px;
-  padding: 7px 11px;
-  border-radius: var(--rayon-s);
+/* Journée écoulée, point jamais répondu : ni oui ni non assumé, mais
+   compté comme non accompli. */
+.hab-oubli {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--or-texte);
   background: var(--or-doux);
   border: 1px solid var(--or-bord);
-  color: var(--or-texte);
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1.35;
 }
 
 /* ─────────── Boutons ─────────── */
@@ -529,6 +535,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 }
 .pastille.ok { background: var(--vert); border-color: var(--vert-texte); color: var(--sur-vert); }
 .pastille.non { background: var(--rouge-doux); border-color: var(--rouge-bord); color: var(--rouge-texte); font-weight: 700; }
+.pastille.oubli { background: var(--or-doux); border-color: var(--or-bord); color: var(--or-texte); font-weight: 700; }
 .ligne-total td { padding-top: 8px !important; }
 .total-jour {
   font-size: 11px;
@@ -605,25 +612,41 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 .barre-piste i { display: block; height: 100%; background: linear-gradient(90deg, var(--or), var(--or-clair)); border-radius: 9px; }
 .barre-val { width: 40px; text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--texte-doux); flex: none; }
 
-/* ─────────── Détail par habitude ─────────── */
-.detail-hab {
+/* ─────────── Ce qui ressort ─────────── */
+.faits { padding: 4px 14px; }
+.fait {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: 12px;
-  padding: 11px 13px;
-  margin-bottom: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--bordure);
 }
-.detail-corps { flex: 1; min-width: 0; }
-.detail-haut { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.detail-nom { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.detail-chiffre { font-size: 13px; font-weight: 700; color: var(--or-texte); flex: none; font-variant-numeric: tabular-nums; }
-.detail-sous { font-size: 11.5px; color: var(--texte-faible); margin-top: 1px; }
-.detail-jauge { height: 5px; border-radius: 3px; background: var(--surface-2); margin-top: 7px; overflow: hidden; }
-.detail-jauge i { display: block; height: 100%; border-radius: 3px; background: var(--or); }
-.detail-jauge i.plein { background: var(--vert); }
+.fait:first-child { border-top: 0; }
+.fait-corps { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fait-lib { font-size: 10.5px; color: var(--texte-faible); letter-spacing: 0.02em; }
+.fait-nom {
+  font-size: 14.5px;
+  font-weight: 650;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fait-mesure { flex: none; text-align: right; display: flex; flex-direction: column; }
+.fait-mesure strong { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.fait-mesure small { font-size: 10.5px; color: var(--texte-faible); }
+.fait-mesure.bon strong { color: var(--vert-texte); }
+.fait-mesure.or strong { color: var(--or-texte); }
+.fait-mesure.faible strong { color: var(--rouge-texte); }
+
+/* Le contenu glisse dans le sens du balayage : le geste se voit. */
+@keyframes venir-de-droite { from { opacity: 0.5; transform: translateX(22px); } }
+@keyframes venir-de-gauche { from { opacity: 0.5; transform: translateX(-22px); } }
+#hist-contenu.depuis-droite { animation: venir-de-droite 0.22s ease-out; }
+#hist-contenu.depuis-gauche { animation: venir-de-gauche 0.22s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  #hist-contenu.depuis-droite, #hist-contenu.depuis-gauche { animation: none; }
+}
 
 .vide-message {
   text-align: center;
@@ -860,8 +883,6 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
       </div>
     </div>
 
-    <p class="rappel cachee" id="rappel-attente" role="status"></p>
-
     <ul class="liste-habitudes" id="liste-habitudes"></ul>
   </section>
 
@@ -895,7 +916,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 
     <div id="hist-contenu"></div>
 
-    <h2 class="titre-section">Détail par habitude</h2>
+    <h2 class="titre-section">Ce qui ressort</h2>
     <div id="hist-detail"></div>
   </section>
 </main>
@@ -1022,7 +1043,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.08.28-8';
+  const VERSION = '2026.09.05-9';
 
   const CLE_STOCKAGE = 'dq.v1';
   /* v2 : abandon des quantités, chaque point se répond par oui ou par non. */
@@ -1214,14 +1235,22 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     return valeurs[h.id] === true;
   }
 
-  function estRepondue(h, valeurs) {
-    return reponse(h, valeurs) !== null;
+  /** La journée est-elle écoulée ? (clés ISO : la comparaison texte suffit) */
+  function jourClos(cle) {
+    return cle < cleDe(aujourdHui());
   }
 
-  /** Habitudes encore sans réponse sur ce jour. */
-  function enAttente(cle, habitudes) {
-    const valeurs = valeursDu(cle);
-    return (habitudes || habitudesActives()).filter((h) => !estRepondue(h, valeurs));
+  /**
+   * État affiché d'un point : 'oui', 'non', 'oubli' ou 'attente'.
+   * 'oubli' = journée écoulée et commencée, mais ce point n'a jamais reçu de
+   * réponse. Il compte comme non accompli, sans être un « non » assumé —
+   * d'où le point d'interrogation plutôt qu'une croix.
+   */
+  function etatPoint(h, cle) {
+    const rep = reponse(h, valeursDu(cle));
+    if (rep === true) return 'oui';
+    if (rep === false) return 'non';
+    return jourClos(cle) && jourRenseigne(cle) ? 'oubli' : 'attente';
   }
 
   /** Le jour contient-il au moins une réponse ? */
@@ -1300,18 +1329,26 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 
     const parHabitude = habs.map((h) => {
       let reussis = 0;
-      let rates = 0;
+      let serie = 0;
+      let courante = 0;
       cles.forEach((c) => {
-        const valeurs = valeursDu(c);
-        if (estFaite(h, valeurs)) reussis++;
-        else if (estRepondue(h, valeurs)) rates++;
+        if (estFaite(h, valeursDu(c))) {
+          reussis++;
+          courante++;
+          if (courante > serie) serie = courante;
+        } else {
+          // Tout ce qui n'est pas un oui casse la suite : non, oubli, ou
+          // journée non suivie.
+          courante = 0;
+        }
       });
+      const base = suivis.length || cles.length;
       return {
         habitude: h,
         reussis: reussis,
-        rates: rates,
-        base: suivis.length || cles.length,
-        pct: (suivis.length || cles.length) ? reussis / (suivis.length || cles.length) : 0
+        serie: serie,
+        base: base,
+        pct: base ? reussis / base : 0
       };
     });
 
@@ -1341,32 +1378,6 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     sauver();
   }
 
-  /**
-   * Clôture les journées écoulées : ce qui n'a pas été répondu passe à « non ».
-   * Une journée jamais ouverte reste vierge — elle est « non suivie », pas
-   * ratée, et ne pénalise donc ni la moyenne ni la série.
-   * @returns {boolean} true si quelque chose a changé.
-   */
-  function cloturerJoursPasses() {
-    const habs = habitudesActives();
-    if (!habs.length) return false;
-    const auj = cleDe(aujourdHui());
-    let modifie = false;
-
-    Object.keys(etat.jours).forEach((cle) => {
-      if (cle >= auj) return;              // clés ISO : la comparaison texte suffit
-      if (!jourRenseigne(cle)) return;     // journée jamais commencée : on n'y touche pas
-      const jour = etat.jours[cle];
-      habs.forEach((h) => {
-        if (jour[h.id] === true || jour[h.id] === false) return;
-        jour[h.id] = false;
-        modifie = true;
-      });
-    });
-
-    if (modifie) sauver();
-    return modifie;
-  }
 
   /* ─────────────── Thème clair / sombre ─────────────── */
 
@@ -1459,9 +1470,6 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     $('#barre-xp').style.width = (dansNiveau / XP_PAR_NIVEAU * 100) + '%';
     $('#xp-texte').textContent = dansNiveau + ' / ' + XP_PAR_NIVEAU + ' XP → niv. ' + (niveau + 1);
 
-    // Rappel des points non répondus
-    rendreRappel(cle, habs);
-
     // Liste des habitudes
     const liste = $('#liste-habitudes');
     liste.innerHTML = '';
@@ -1475,10 +1483,9 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     }
 
     habs.forEach((h) => {
-      const rep = reponse(h, valeurs);
+      const etatH = etatPoint(h, cle);
       const li = document.createElement('li');
-      li.className = 'habitude' +
-        (rep === true ? ' faite' : rep === false ? ' ratee' : ' attente');
+      li.className = 'habitude ' + ({ oui: 'faite', non: 'ratee', oubli: 'oubliee' }[etatH] || 'attente');
       li.dataset.id = h.id;
 
       const emoji = document.createElement('div');
@@ -1491,14 +1498,24 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
       nom.textContent = h.nom;
       li.appendChild(nom);
 
+      // Journée écoulée sans réponse : un « ? » jaune. Les deux boutons
+      // restent actifs, l'oubli se rattrape.
+      if (etatH === 'oubli') {
+        const marque = document.createElement('span');
+        marque.className = 'hab-oubli';
+        marque.textContent = '?';
+        marque.title = 'Sans réponse — compté comme non accompli';
+        li.appendChild(marque);
+      }
+
       // Oui et non côte à côte : répondre « non » est un geste aussi
       // explicite que répondre « oui », c'est ce qui évite les oublis.
       const zone = document.createElement('div');
       zone.className = 'hab-reponse';
       zone.setAttribute('role', 'group');
       zone.setAttribute('aria-label', h.nom);
-      zone.appendChild(boutonReponse(h, 'oui', rep === true));
-      zone.appendChild(boutonReponse(h, 'non', rep === false));
+      zone.appendChild(boutonReponse(h, 'oui', etatH === 'oui'));
+      zone.appendChild(boutonReponse(h, 'non', etatH === 'non'));
       li.appendChild(zone);
 
       liste.appendChild(li);
@@ -1518,19 +1535,6 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     return b;
   }
 
-  /**
-   * Rappel des habitudes encore sans réponse. Affiché uniquement sur une
-   * journée qui n'est pas encore close : ailleurs, tout est déjà tranché.
-   */
-  function rendreRappel(cle, habs) {
-    const boite = $('#rappel-attente');
-    const reste = enAttente(cle, habs).length;
-    const passe = cle < cleDe(aujourdHui());
-    boite.classList.toggle('cachee', reste === 0 || passe);
-    if (reste === 0 || passe) return;
-    boite.textContent = reste + (reste > 1 ? ' points sans réponse' : ' point sans réponse') +
-      ' — ils passeront à « non » à la fin de la journée.';
-  }
 
   /**
    * Règle la hauteur des lignes pour que toutes les habitudes tiennent
@@ -1654,8 +1658,8 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     else if (modeHistorique === 'mois') boite.appendChild(vueMois(cles));
     else boite.appendChild(vueAnnee(cles));
 
-    // Détail par habitude
-    rendreDetailHabitudes(donnees);
+    // Ce qui ressort de la période
+    rendreFaitsMarquants(donnees);
   }
 
   function vueSemaine(cles) {
@@ -1697,21 +1701,24 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
       tr.appendChild(td);
 
       cles.forEach((c) => {
-        const valeurs = valeursDu(c);
         const cellule = document.createElement('td');
         const p = document.createElement('div');
-        const rep = reponse(h, valeurs);
-        if (rep === true) {
+        const etatH = etatPoint(h, c);
+        if (etatH === 'oui') {
           p.className = 'pastille ok';
           p.textContent = '✓';
           p.title = h.nom + ' — oui';
-        } else if (rep === false) {
+        } else if (etatH === 'non') {
           p.className = 'pastille non';
           p.textContent = '✕';
           p.title = h.nom + ' — non';
+        } else if (etatH === 'oubli') {
+          p.className = 'pastille oubli';
+          p.textContent = '?';
+          p.title = h.nom + ' — sans réponse, compté comme non accompli';
         } else {
           p.className = 'pastille';
-          p.title = h.nom + ' — sans réponse';
+          p.title = h.nom + ' — pas encore répondu';
         }
         cellule.appendChild(p);
         tr.appendChild(cellule);
@@ -1921,61 +1928,78 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     return l;
   }
 
-  function rendreDetailHabitudes(donnees) {
+  /**
+   * Trois enseignements sur la période affichée : l'habitude la mieux tenue,
+   * la plus longue suite de « oui », et celle qui décroche. Plus lisible d'un
+   * coup d'œil que la liste exhaustive qu'elle remplace.
+   */
+  function rendreFaitsMarquants(donnees) {
     const boite = $('#hist-detail');
     boite.innerHTML = '';
 
-    if (!donnees.parHabitude.length) {
-      const vide = document.createElement('div');
-      vide.className = 'vide-message';
-      vide.textContent = 'Aucune habitude active.';
-      boite.appendChild(vide);
+    const liste = donnees.parHabitude;
+    if (!liste.length) {
+      boite.appendChild(messageVide('Aucune habitude active.'));
+      return;
+    }
+    if (!donnees.suivis) {
+      boite.appendChild(messageVide('Aucune journée suivie sur cette période.'));
       return;
     }
 
-    donnees.parHabitude.forEach((d) => {
-      const h = d.habitude;
-      const item = document.createElement('div');
-      item.className = 'detail-hab';
+    // reduce plutôt qu'un tri : à égalité, c'est la première dans l'ordre
+    // choisi par l'utilisateur qui l'emporte, et non un ordre arbitraire.
+    const meilleure = liste.reduce((m, d) => (d.pct > m.pct ? d : m));
+    const constante = liste.reduce((m, d) => (d.serie > m.serie ? d : m));
+    const faible = liste.reduce((m, d) => (d.pct < m.pct ? d : m));
 
-      const emoji = document.createElement('div');
-      emoji.className = 'hab-emoji';
-      emoji.textContent = h.emoji || '•';
-      item.appendChild(emoji);
+    const carte = document.createElement('div');
+    carte.className = 'carte faits';
+    [
+      { lib: '🥇 La mieux tenue', d: meilleure, valeur: Math.round(meilleure.pct * 100) + ' %',
+        detail: meilleure.reussis + ' j sur ' + meilleure.base, ton: 'bon' },
+      { lib: '🔥 Plus longue série', d: constante, valeur: constante.serie + ' j',
+        detail: constante.serie > 1 ? 'jours d\u2019affilée' : 'sans suite de deux jours', ton: 'or' },
+      { lib: '🐢 La moins réalisée', d: faible, valeur: Math.round(faible.pct * 100) + ' %',
+        detail: faible.reussis + ' j sur ' + faible.base, ton: 'faible' }
+    ].forEach((f) => carte.appendChild(ligneFait(f)));
+    boite.appendChild(carte);
+  }
 
-      const corps = document.createElement('div');
-      corps.className = 'detail-corps';
+  function ligneFait(f) {
+    const ligne = document.createElement('div');
+    ligne.className = 'fait';
 
-      const haut = document.createElement('div');
-      haut.className = 'detail-haut';
-      const nom = document.createElement('span');
-      nom.className = 'detail-nom';
-      nom.textContent = h.nom;
-      const chiffre = document.createElement('span');
-      chiffre.className = 'detail-chiffre';
-      chiffre.textContent = d.reussis + ' j';
-      haut.appendChild(nom);
-      haut.appendChild(chiffre);
-      corps.appendChild(haut);
+    const gauche = document.createElement('div');
+    gauche.className = 'fait-corps';
+    const lib = document.createElement('span');
+    lib.className = 'fait-lib';
+    lib.textContent = f.lib;
+    const nom = document.createElement('span');
+    nom.className = 'fait-nom';
+    nom.textContent = (f.d.habitude.emoji || '•') + ' ' + f.d.habitude.nom;
+    gauche.appendChild(lib);
+    gauche.appendChild(nom);
 
-      const sous = document.createElement('div');
-      sous.className = 'detail-sous';
-      const base = donnees.suivis || 0;
-      sous.textContent = 'Oui ' + d.reussis + ' j · non ' + d.rates + ' j · ' +
-        Math.round(d.pct * 100) + ' % sur ' + base + ' j suivis';
-      corps.appendChild(sous);
+    const droite = document.createElement('div');
+    droite.className = 'fait-mesure ' + f.ton;
+    const val = document.createElement('strong');
+    val.textContent = f.valeur;
+    const det = document.createElement('small');
+    det.textContent = f.detail;
+    droite.appendChild(val);
+    droite.appendChild(det);
 
-      const jauge = document.createElement('div');
-      jauge.className = 'detail-jauge';
-      const rempli = document.createElement('i');
-      rempli.style.width = (Math.min(1, d.pct) * 100).toFixed(1) + '%';
-      if (d.pct >= 1) rempli.className = 'plein';
-      jauge.appendChild(rempli);
-      corps.appendChild(jauge);
+    ligne.appendChild(gauche);
+    ligne.appendChild(droite);
+    return ligne;
+  }
 
-      item.appendChild(corps);
-      boite.appendChild(item);
-    });
+  function messageVide(texte) {
+    const vide = document.createElement('div');
+    vide.className = 'vide-message';
+    vide.textContent = texte;
+    return vide;
   }
 
   /* ─────────────── Navigation entre onglets ─────────────── */
@@ -2010,6 +2034,47 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     } else {
       decalerPeriode(1);
     }
+  }
+
+  /* ─────────────── Glissement horizontal (historique) ─────────────── */
+
+  const SEUIL_GLISSE = 55;     // px avant qu'un mouvement compte comme un balayage
+  let glisseHistorique = null;
+
+  function debutGlisseHistorique(evt) {
+    // La carte de chaleur de l'année défile déjà horizontalement : on lui
+    // laisse le geste.
+    if (evt.target.closest('.heatmap-boite')) return;
+    if (evt.pointerType === 'mouse' && evt.button !== 0) return;
+    glisseHistorique = { x: evt.clientX, y: evt.clientY };
+  }
+
+  function finGlisseHistorique(evt) {
+    const depart = glisseHistorique;
+    glisseHistorique = null;
+    if (!depart) return;
+
+    const dx = evt.clientX - depart.x;
+    const dy = evt.clientY - depart.y;
+    // Franchement horizontal, sinon c'est un défilement vertical ou un appui.
+    if (Math.abs(dx) < SEUIL_GLISSE || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+
+    if (dx < 0) {
+      if (periodeEstCourante()) return;   // pas de période à venir
+      decalerPeriode(1);
+      animerHistorique('depuis-droite');
+    } else {
+      decalerPeriode(-1);
+      animerHistorique('depuis-gauche');
+    }
+  }
+
+  /** Petit glissé du contenu : confirme que le geste a été pris en compte. */
+  function animerHistorique(sens) {
+    const boite = $('#hist-contenu');
+    boite.classList.remove('depuis-droite', 'depuis-gauche');
+    void boite.offsetWidth;              // force le redémarrage de l'animation
+    boite.classList.add(sens);
   }
 
   /* ─────────────── Modales ─────────────── */
@@ -2455,7 +2520,6 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
             donnees.jours = donnees.jours || {};
             donnees.reglages = Object.assign({ objectif: 80, theme: 'auto' }, donnees.reglages);
             etat = migrer(donnees);
-            cloturerJoursPasses();
             sauver();
             appliquerTheme();
             rendreJour();
@@ -2507,7 +2571,12 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     window.addEventListener('resize', () => { if (vueActive === 'jour') ajusterDensite(); });
     window.addEventListener('orientationchange', () => setTimeout(ajusterDensite, 200));
 
-    // Historique
+    // Historique : balayage horizontal pour changer de semaine, de mois ou d'année
+    const vueHist = $('#vue-historique');
+    vueHist.addEventListener('pointerdown', debutGlisseHistorique);
+    vueHist.addEventListener('pointerup', finGlisseHistorique);
+    vueHist.addEventListener('pointercancel', () => { glisseHistorique = null; });
+
     $$('.segment').forEach((s) => s.addEventListener('click', () => {
       modeHistorique = s.dataset.mode;
       ancreHistorique = aujourdHui();
@@ -2641,7 +2710,6 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   function demarrer() {
     if (verifierCoherence()) return;
     etat = charger();
-    cloturerJoursPasses();
     sauver();
     appliquerTheme();
     try {
@@ -2657,9 +2725,8 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
     setInterval(() => {
       if (vueActive !== 'jour' || !suivaitAujourdHui) return;
       if (!memeJour(jourCourant, aujourdHui())) {
-        // Passage de minuit : la journée écoulée se ferme, ce qui n'a pas
-        // été répondu passe à « non ».
-        cloturerJoursPasses();
+        // Passage de minuit : la journée écoulée se ferme d'elle-même, ses
+        // points sans réponse basculent en « oublié ».
         jourCourant = aujourdHui();
         rendreJour();
       }
