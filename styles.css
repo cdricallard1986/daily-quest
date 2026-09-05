@@ -200,6 +200,7 @@ input.erreur { border-color: var(--rouge); }
 .btn-icone:active { background: var(--surface-2); }
 
 main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
+#vue-historique { touch-action: pan-y; }
 .vue.cachee, .cachee { display: none !important; }
 
 /* ─────────── Navigation de période ─────────── */
@@ -482,35 +483,74 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
   margin: 22px 0 10px;
 }
 
-/* ─────────── Grille semaine ─────────── */
-.grille-semaine { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.tab-semaine { width: 100%; border-collapse: separate; border-spacing: 0; }
-.tab-semaine th, .tab-semaine td { padding: 0; }
-.tab-semaine thead th {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--texte-faible);
-  padding-bottom: 8px;
-  text-align: center;
-  width: 34px;
+/* ─────────── Grille semaine ───────────
+   Deux zones : les libellés, fixes, et une fenêtre où défile la piste des
+   jours. Les hauteurs sont posées ici, en dur, car ce sont elles qui font
+   correspondre les lignes des deux zones. */
+:root { --sem-tete: 36px; --sem-ligne: 32px; --sem-total: 30px; }
+
+/* Pas de sélection sur la carte : sans ça, un glissement attrape le texte
+   des cases (drag de sélection au pointeur, loupe au doigt) et le geste est
+   perdu en cours de route. */
+.semaine {
+  display: flex;
+  padding: 14px 12px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.tab-semaine thead th.aujourdhui { color: var(--or-texte); }
-.tab-semaine thead th small { display: block; font-size: 10px; font-weight: 500; opacity: 0.75; }
-.col-hab { text-align: left !important; width: auto !important; min-width: 96px; }
-.cel-hab {
+.sem-noms { flex: none; width: 128px; display: flex; flex-direction: column; }
+/* Bloc et non flex : « text-overflow: ellipsis » est sans effet sur un
+   conteneur flex, et le nom déborderait alors sur la piste des jours. */
+.sem-nom {
+  height: var(--sem-ligne);
+  line-height: var(--sem-ligne);
   font-size: 12.5px;
   color: var(--texte-doux);
-  padding: 4px 8px 4px 0 !important;
+  padding-right: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
 }
-.cel-hab .e { margin-right: 5px; }
+.sem-nom .e { margin-right: 5px; }
+
+/* touch-action : le vertical reste à la page, l'horizontal nous revient —
+   sans quoi iOS annule le geste dès que la page peut défiler. */
+.sem-fenetre { flex: 1; min-width: 0; overflow: hidden; touch-action: pan-y; }
+.sem-piste { display: flex; transform: translateX(-100%); transition: transform 0.19s ease-out; }
+.sem-piste.sans-transition { transition: none; }
+.sem-bloc { flex: 0 0 100%; display: flex; }
+.sem-col { flex: 1; min-width: 0; }
+
+.sem-tete {
+  height: var(--sem-tete);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texte-faible);
+}
+.sem-tete small { font-size: 10px; font-weight: 500; opacity: 0.75; }
+.sem-col.aujourdhui .sem-tete { color: var(--or-texte); }
+
+.sem-case { height: var(--sem-ligne); display: grid; place-items: center; }
+.sem-total {
+  height: var(--sem-total);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texte-doux);
+  font-variant-numeric: tabular-nums;
+}
+.sem-noms .sem-total { justify-content: flex-start; font-weight: 600; }
+
 .pastille {
   width: 26px;
   height: 26px;
-  margin: 3px auto;
   border-radius: 8px;
   background: var(--surface);
   border: 1px solid var(--bordure);
@@ -522,14 +562,6 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 .pastille.ok { background: var(--vert); border-color: var(--vert-texte); color: var(--sur-vert); }
 .pastille.non { background: var(--rouge-doux); border-color: var(--rouge-bord); color: var(--rouge-texte); font-weight: 700; }
 .pastille.oubli { background: var(--or-doux); border-color: var(--or-bord); color: var(--or-texte); font-weight: 700; }
-.ligne-total td { padding-top: 8px !important; }
-.total-jour {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--texte-doux);
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
 
 /* ─────────── Calendrier mois ─────────── */
 .calendrier { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
@@ -561,6 +593,7 @@ main { padding: 10px 12px; max-width: 720px; margin: 0 auto; }
 
 /* ─────────── Heatmap année ─────────── */
 .heatmap-boite {
+  touch-action: pan-x;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 6px;

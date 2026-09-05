@@ -10,7 +10,7 @@
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.09.05-9';
+  const VERSION = '2026.09.05-10';
 
   const CLE_STOCKAGE = 'dq.v1';
   /* v2 : abandon des quantités, chaque point se répond par oui ou par non. */
@@ -621,7 +621,7 @@
     // Contenu principal
     const boite = $('#hist-contenu');
     boite.innerHTML = '';
-    if (modeHistorique === 'semaine') boite.appendChild(vueSemaine(cles));
+    if (modeHistorique === 'semaine') boite.appendChild(vueSemaine());
     else if (modeHistorique === 'mois') boite.appendChild(vueMois(cles));
     else boite.appendChild(vueAnnee(cles));
 
@@ -629,46 +629,79 @@
     rendreFaitsMarquants(donnees);
   }
 
-  function vueSemaine(cles) {
-    const carte = document.createElement('div');
-    carte.className = 'carte grille-semaine';
-
+  /**
+   * Vue semaine : la colonne des libellés reste fixe, les sept jours vivent
+   * dans une piste que l'on fait glisser d'une semaine à l'autre. Trois blocs
+   * sont montés d'avance (précédente, affichée, suivante) pour que le
+   * mouvement suive le doigt sans rien recalculer.
+   */
+  function vueSemaine() {
     const habs = habitudesActives();
-    if (!habs.length) {
-      carte.className = 'vide-message';
-      carte.textContent = 'Aucune habitude active.';
-      return carte;
-    }
+    if (!habs.length) return messageVide('Aucune habitude active.');
 
-    const table = document.createElement('table');
-    table.className = 'tab-semaine';
+    const carte = document.createElement('div');
+    carte.className = 'carte semaine';
 
-    const thead = document.createElement('thead');
-    const trh = document.createElement('tr');
-    const vide = document.createElement('th');
-    vide.className = 'col-hab';
-    trh.appendChild(vide);
-    cles.forEach((c, i) => {
-      const d = dateDe(c);
-      const th = document.createElement('th');
-      if (memeJour(d, aujourdHui())) th.className = 'aujourdhui';
-      th.innerHTML = JOURS_COURTS[i] + '<small>' + d.getDate() + '</small>';
-      trh.appendChild(th);
-    });
-    thead.appendChild(trh);
-    table.appendChild(thead);
-
-    const tbody = document.createElement('tbody');
+    const noms = document.createElement('div');
+    noms.className = 'sem-noms';
+    noms.appendChild(celluleSemaine('sem-tete', ''));
     habs.forEach((h) => {
-      const tr = document.createElement('tr');
-      const td = document.createElement('td');
-      td.className = 'cel-hab';
-      td.innerHTML = '<span class="e">' + (h.emoji || '•') + '</span>';
-      td.appendChild(document.createTextNode(h.nom));
-      tr.appendChild(td);
+      const ligne = celluleSemaine('sem-nom', '');
+      const emoji = document.createElement('span');
+      emoji.className = 'e';
+      emoji.textContent = h.emoji || '•';
+      ligne.appendChild(emoji);
+      ligne.appendChild(document.createTextNode(h.nom));
+      ligne.title = h.nom;
+      noms.appendChild(ligne);
+    });
+    noms.appendChild(celluleSemaine('sem-total', 'Total'));
+    carte.appendChild(noms);
 
-      cles.forEach((c) => {
-        const cellule = document.createElement('td');
+    const fenetre = document.createElement('div');
+    fenetre.className = 'sem-fenetre';
+    const piste = document.createElement('div');
+    piste.className = 'sem-piste';
+
+    const debut = debutSemaine(ancreHistorique);
+    piste.appendChild(blocSemaine(ajouterJours(debut, -7), habs));
+    piste.appendChild(blocSemaine(debut, habs));
+    // Pas de bloc pour une semaine à venir : on ne glisse pas vers le futur.
+    if (!periodeEstCourante()) piste.appendChild(blocSemaine(ajouterJours(debut, 7), habs));
+
+    fenetre.appendChild(piste);
+    brancherGlisseSemaine(fenetre, piste);
+    carte.appendChild(fenetre);
+    return carte;
+  }
+
+  function celluleSemaine(classe, texte) {
+    const el = document.createElement('div');
+    el.className = classe;
+    if (texte) el.textContent = texte;
+    return el;
+  }
+
+  /** Les sept colonnes d'une semaine, à partir de son lundi. */
+  function blocSemaine(debut, habs) {
+    const bloc = document.createElement('div');
+    bloc.className = 'sem-bloc';
+    const auj = aujourdHui();
+
+    for (let i = 0; i < 7; i++) {
+      const d = ajouterJours(debut, i);
+      const c = cleDe(d);
+      const col = document.createElement('div');
+      col.className = 'sem-col' + (memeJour(d, auj) ? ' aujourdhui' : '');
+
+      const tete = celluleSemaine('sem-tete', JOURS_COURTS[i]);
+      const num = document.createElement('small');
+      num.textContent = d.getDate();
+      tete.appendChild(num);
+      col.appendChild(tete);
+
+      habs.forEach((h) => {
+        const boite = celluleSemaine('sem-case', '');
         const p = document.createElement('div');
         const etatH = etatPoint(h, c);
         if (etatH === 'oui') {
@@ -687,31 +720,88 @@
           p.className = 'pastille';
           p.title = h.nom + ' — pas encore répondu';
         }
-        cellule.appendChild(p);
-        tr.appendChild(cellule);
+        boite.appendChild(p);
+        col.appendChild(boite);
       });
-      tbody.appendChild(tr);
-    });
 
-    // Ligne de total par jour
-    const trTotal = document.createElement('tr');
-    trTotal.className = 'ligne-total';
-    const tdVide = document.createElement('td');
-    tdVide.className = 'cel-hab';
-    tdVide.textContent = 'Total';
-    trTotal.appendChild(tdVide);
-    cles.forEach((c) => {
       const s = scoreJour(c, habs);
-      const td = document.createElement('td');
-      td.className = 'total-jour';
-      td.textContent = s.vide ? '–' : s.faits + '/' + s.total;
-      trTotal.appendChild(td);
-    });
-    tbody.appendChild(trTotal);
+      col.appendChild(celluleSemaine('sem-total', s.vide ? '–' : s.faits + '/' + s.total));
+      bloc.appendChild(col);
+    }
+    return bloc;
+  }
 
-    table.appendChild(tbody);
-    carte.appendChild(table);
-    return carte;
+  /* ─────────────── Glissement de la piste des jours ─────────────── */
+
+  let glisseSemaine = null;
+
+  function brancherGlisseSemaine(fenetre, piste) {
+    fenetre.addEventListener('pointerdown', (evt) => {
+      if (evt.pointerType === 'mouse' && evt.button !== 0) return;
+      glisseSemaine = {
+        fenetre: fenetre,
+        piste: piste,
+        x: evt.clientX,
+        y: evt.clientY,
+        largeur: fenetre.getBoundingClientRect().width,
+        suivante: piste.children.length > 2,
+        horizontal: null      // intention encore indécise
+      };
+    });
+    fenetre.addEventListener('pointermove', surGlisseSemaine);
+    fenetre.addEventListener('pointerup', finGlisseSemaine);
+    fenetre.addEventListener('pointercancel', annulerGlisseSemaine);
+  }
+
+  function surGlisseSemaine(evt) {
+    const g = glisseSemaine;
+    if (!g) return;
+    const dx = evt.clientX - g.x;
+    const dy = evt.clientY - g.y;
+
+    // Le premier mouvement décide : horizontal, on prend la main ; vertical,
+    // on rend le geste à la page pour qu'elle défile normalement.
+    if (g.horizontal === null) {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      if (Math.abs(dx) <= Math.abs(dy)) { glisseSemaine = null; return; }
+      g.horizontal = true;
+      try { g.fenetre.setPointerCapture(evt.pointerId); } catch (e) { /* sans capture, ça marche encore */ }
+      g.piste.classList.add('sans-transition');
+    }
+    g.piste.style.transform = 'translateX(' + (-g.largeur + retenue(dx, g)) + 'px)';
+  }
+
+  /** Vers le futur, le geste résiste au lieu d'avancer dans le vide. */
+  function retenue(dx, g) {
+    return dx < 0 && !g.suivante ? Math.max(dx / 4, -46) : dx;
+  }
+
+  function finGlisseSemaine(evt) {
+    const g = glisseSemaine;
+    glisseSemaine = null;
+    if (!g || !g.horizontal) return;
+
+    const dx = evt.clientX - g.x;
+    const seuil = Math.min(70, g.largeur * 0.28);
+    g.piste.classList.remove('sans-transition');
+
+    if (dx > seuil) poserSemaine(g, 0, -1);
+    else if (dx < -seuil && g.suivante) poserSemaine(g, -2 * g.largeur, 1);
+    else g.piste.style.transform = '';        // retour en place
+  }
+
+  function annulerGlisseSemaine() {
+    const g = glisseSemaine;
+    glisseSemaine = null;
+    if (!g || !g.horizontal) return;
+    g.piste.classList.remove('sans-transition');
+    g.piste.style.transform = '';
+  }
+
+  /** Termine le glissement, puis rebâtit la vue sur la semaine atteinte. */
+  function poserSemaine(g, cible, sens) {
+    g.piste.style.transform = 'translateX(' + cible + 'px)';
+    setTimeout(() => decalerPeriode(sens), 190);   // durée de la transition CSS
   }
 
   function vueMois(cles) {
@@ -1009,9 +1099,9 @@
   let glisseHistorique = null;
 
   function debutGlisseHistorique(evt) {
-    // La carte de chaleur de l'année défile déjà horizontalement : on lui
-    // laisse le geste.
-    if (evt.target.closest('.heatmap-boite')) return;
+    // La piste des jours et la carte de chaleur gèrent déjà le geste
+    // horizontal : on ne le leur prend pas.
+    if (evt.target.closest('.sem-fenetre, .heatmap-boite')) return;
     if (evt.pointerType === 'mouse' && evt.button !== 0) return;
     glisseHistorique = { x: evt.clientX, y: evt.clientY };
   }

@@ -42,12 +42,18 @@ hors-ligne.
 
 Trois modes, avec navigation vers les périodes passées — par les flèches `‹` / `›`
 de l'en-tête ou en **balayant l'écran horizontalement** (vers la droite pour reculer,
-vers la gauche pour revenir). La carte de chaleur de l'année garde son propre
-défilement horizontal.
+vers la gauche pour revenir). Impossible d'aller au-delà de la période en cours : le
+geste résiste au lieu d'avancer dans le vide.
+
+En mode semaine, ce sont les **sept colonnes de jours qui coulissent sous le doigt**,
+la colonne des libellés restant fixe comme repère. Les semaines voisines sont montées
+d'avance, si bien que le mouvement suit le doigt ; au relâcher, la semaine atteinte se
+pose et tout se recalcule — résumé, totaux par jour et « ce qui ressort ». La carte de
+chaleur de l'année garde, elle, son propre défilement horizontal.
 
 | Mode | Affichage |
 |---|---|
-| **Semaine** | Grille habitudes × 7 jours : `✓` oui, `✕` non, `?` oublié, case vide sans réponse, plus le total par jour. |
+| **Semaine** | Grille habitudes × 7 jours, les jours coulissant d'une semaine à l'autre : `✓` oui, `✕` non, `?` oublié, case vide sans réponse, plus le total par jour. |
 | **Mois** | Calendrier coloré par taux de réussite ; un appui sur un jour l'ouvre dans l'onglet Aujourd'hui. |
 | **Année** | Carte de chaleur des 365 jours (défilement horizontal) + moyenne par mois. |
 
