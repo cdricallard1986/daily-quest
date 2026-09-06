@@ -10,7 +10,7 @@
   /* Affichée dans les réglages : permet de vérifier d'un coup d'œil quelle
      version tourne réellement sur l'appareil. À incrémenter à chaque
      déploiement, en même temps que CACHE dans sw.js. */
-  const VERSION = '2026.09.05-12';
+  const VERSION = '2026.09.06-13';
 
   const CLE_STOCKAGE = 'dq.v1';
   /* v2 : abandon des quantités, chaque point se répond par oui ou par non. */
@@ -1956,7 +1956,14 @@
 
   function brancher() {
     // Onglets
-    $$('.onglet').forEach((o) => o.addEventListener('click', () => basculerVue(o.dataset.vue)));
+    $$('.onglet').forEach((o) => o.addEventListener('click', () => {
+      // Retaper sur « Aujourd'hui » ramène à la journée en cours : après
+      // s'être promené dans les jours passés, c'est le geste qu'on attend.
+      // Le calendrier du mois appelle basculerVue directement, lui : il
+      // continue donc d'ouvrir le jour sur lequel on a tapé.
+      if (o.dataset.vue === 'jour') jourCourant = aujourdHui();
+      basculerVue(o.dataset.vue);
+    }));
 
     // Navigation partagée (en-tête) : jour ou période selon l'onglet actif.
     $('#nav-prec').addEventListener('click', reculer);

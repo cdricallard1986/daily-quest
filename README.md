@@ -15,6 +15,10 @@ hors-ligne.
 
 - La journée en cours ; les flèches `‹` / `›` de l'en-tête servent les deux onglets
   (jour ici, période dans l'historique). Impossible d'aller au-delà d'aujourd'hui.
+  Un appui sur l'onglet **Aujourd'hui** ramène toujours à la journée en cours, même
+  s'il est déjà actif — c'est la sortie de secours quand on s'est promené dans les
+  jours passés. Le calendrier du mois, lui, continue d'ouvrir le jour sur lequel on
+  a tapé.
 - Un anneau de progression (`8 / 12`, `67 %`) et trois indicateurs de jeu :
   **série** (🔥 jours consécutifs au-dessus de l'objectif), **record** (meilleure série
   historique) et **niveau** (1 XP par point validé **plus les points des bonus
